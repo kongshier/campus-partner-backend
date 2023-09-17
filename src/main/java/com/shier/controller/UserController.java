@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://partner.kongshier.top"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://pt.kongshier.top"}, allowCredentials = "true")
 @Slf4j
 @Api(tags = "用户管理模块")
 public class UserController {

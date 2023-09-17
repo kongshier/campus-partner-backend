@@ -6,8 +6,6 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.google.gson.Gson;
 import com.shier.config.HttpSessionConfig;
-import com.shier.constants.ChatConstant;
-import com.shier.constants.UserConstants;
 import com.shier.model.domain.Chat;
 import com.shier.model.domain.Team;
 import com.shier.model.domain.User;
@@ -33,11 +31,15 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import static com.shier.constants.ChatConstant.*;
+import static com.shier.constants.UserConstants.ADMIN_ROLE;
+import static com.shier.constants.UserConstants.USER_LOGIN_STATE;
+
 
 /**
  * WebSocket服务
  *
- * @author Shier
+ * @author OchiaMalu
  * @date 2023/06/22
  */
 @Component
@@ -185,7 +187,7 @@ public class WebSocket {
                 return;
             }
             HttpSession httpSession = (HttpSession) config.getUserProperties().get(HttpSession.class.getName());
-            User user = (User) httpSession.getAttribute(UserConstants.USER_LOGIN_STATE);
+            User user = (User) httpSession.getAttribute(USER_LOGIN_STATE);
             if (user != null) {
                 this.session = session;
                 this.httpSession = httpSession;
@@ -260,10 +262,10 @@ public class WebSocket {
         Integer chatType = messageRequest.getChatType();
         User fromUser = userService.getById(userId);
         Team team = teamService.getById(teamId);
-        if (chatType == ChatConstant.PRIVATE_CHAT) {
+        if (chatType == PRIVATE_CHAT) {
             // 私聊
             privateChat(fromUser, toId, text, chatType);
-        } else if (chatType == ChatConstant.TEAM_CHAT) {
+        } else if (chatType == TEAM_CHAT) {
             // 队伍内聊天
             teamChat(fromUser, text, team, chatType);
         } else {
@@ -289,18 +291,18 @@ public class WebSocket {
         ChatMessageVO.setTeamId(team.getId());
         ChatMessageVO.setChatType(chatType);
         ChatMessageVO.setCreateTime(DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
-        if (user.getId().equals(team.getUserId()) || user.getRole() == UserConstants.ADMIN_ROLE) {
+        if (user.getId() == team.getUserId() || user.getRole() == ADMIN_ROLE) {
             ChatMessageVO.setIsAdmin(true);
         }
-        User loginUser = (User) this.httpSession.getAttribute(UserConstants.USER_LOGIN_STATE);
-        if (loginUser.getId().equals(user.getId())) {
+        User loginUser = (User) this.httpSession.getAttribute(USER_LOGIN_STATE);
+        if (loginUser.getId() == user.getId()) {
             ChatMessageVO.setIsMy(true);
         }
         String toJson = new Gson().toJson(ChatMessageVO);
         try {
             broadcast(String.valueOf(team.getId()), toJson);
             saveChat(user.getId(), null, text, team.getId(), chatType);
-            chatService.deleteKey(ChatConstant.CACHE_CHAT_TEAM, String.valueOf(team.getId()));
+            chatService.deleteKey(CACHE_CHAT_TEAM, String.valueOf(team.getId()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -321,17 +323,17 @@ public class WebSocket {
         ChatMessageVO.setText(text);
         ChatMessageVO.setChatType(chatType);
         ChatMessageVO.setCreateTime(DateUtil.format(new Date(), "yyyy年MM月dd日 HH:mm:ss"));
-        if (user.getRole() == UserConstants.ADMIN_ROLE) {
+        if (user.getRole() == ADMIN_ROLE) {
             ChatMessageVO.setIsAdmin(true);
         }
-        User loginUser = (User) this.httpSession.getAttribute(UserConstants.USER_LOGIN_STATE);
-        if (loginUser.getId().equals(user.getId())) {
+        User loginUser = (User) this.httpSession.getAttribute(USER_LOGIN_STATE);
+        if (loginUser.getId() == user.getId()) {
             ChatMessageVO.setIsMy(true);
         }
         String toJson = new Gson().toJson(ChatMessageVO);
         sendAllMessage(toJson);
         saveChat(user.getId(), null, text, null, chatType);
-        chatService.deleteKey(ChatConstant.CACHE_CHAT_HALL, String.valueOf(user.getId()));
+        chatService.deleteKey(CACHE_CHAT_HALL, String.valueOf(user.getId()));
     }
 
     /**
@@ -344,15 +346,15 @@ public class WebSocket {
      */
     private void privateChat(User user, Long toId, String text, Integer chatType) {
         ChatMessageVO ChatMessageVO = chatService.chatResult(user.getId(), toId, text, chatType, DateUtil.date(System.currentTimeMillis()));
-        User loginUser = (User) this.httpSession.getAttribute(UserConstants.USER_LOGIN_STATE);
-        if (loginUser.getId().equals(user.getId())) {
+        User loginUser = (User) this.httpSession.getAttribute(USER_LOGIN_STATE);
+        if (loginUser.getId() == user.getId()) {
             ChatMessageVO.setIsMy(true);
         }
         String toJson = new Gson().toJson(ChatMessageVO);
         sendOneMessage(toId.toString(), toJson);
         saveChat(user.getId(), toId, text, null, chatType);
-        chatService.deleteKey(ChatConstant.CACHE_CHAT_PRIVATE, user.getId() + "" + toId);
-        chatService.deleteKey(ChatConstant.CACHE_CHAT_PRIVATE, toId + "" + user.getId());
+        chatService.deleteKey(CACHE_CHAT_PRIVATE, user.getId() + "" + toId);
+        chatService.deleteKey(CACHE_CHAT_PRIVATE, toId + "" + user.getId());
     }
 
     /**

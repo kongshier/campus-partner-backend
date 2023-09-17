@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 @Api(tags = "文件管理")
 @RestController
 @RequestMapping("/common")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://partner.kongshier.top"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://pt.kongshier.top"}, allowCredentials = "true")
 public class FileAliOssController {
 
     @Resource

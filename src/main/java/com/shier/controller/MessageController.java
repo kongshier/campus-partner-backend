@@ -4,6 +4,7 @@ import com.shier.common.BaseResponse;
 import com.shier.common.ErrorCode;
 import com.shier.common.ResultUtils;
 import com.shier.constants.RedisConstants;
+import com.shier.exception.BusinessException;
 import com.shier.model.domain.User;
 import com.shier.model.vo.BlogVO;
 import com.shier.model.vo.MessageVO;
@@ -13,7 +14,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import com.shier.exception.BusinessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +33,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/message")
 @Api(tags = "消息管理模块")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://partner.kongshier.top"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://pt.kongshier.top"}, allowCredentials = "true")
 public class MessageController {
 
     /**
@@ -50,6 +50,7 @@ public class MessageController {
 
     @Resource
     private UserService userService;
+
 
     /**
      * 用户是否有新消息

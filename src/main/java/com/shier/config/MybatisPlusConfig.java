@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * mybatis +配置
+ * mybatis 分页配置
  *
  * @author Shier
  * @date 2023/07/28

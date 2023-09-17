@@ -12,7 +12,7 @@
         <img src="https://img.shields.io/badge/springboot-2.6.4-green" ></img>
         <img src="https://img.shields.io/badge/vue-3.2-blue" ></img>
 		<img src="https://img.shields.io/badge/vant-4.3.1-green" ></img>
-        <img src="https://img.shields.io/badge/knife4j-3.0.0-red" ></img>
+        <img src="https://img.shields.io/badge/knife4j-2.0.7-red" ></img>
         <img src="https://img.shields.io/badge/mybatis--plus-3.5.1-green" ></img>
 		<img src="https://img.shields.io/badge/websocket-2.6.4-red" ></img>
 		<img src="https://img.shields.io/badge/MySQL-8.0.20-red" ></img>
@@ -29,16 +29,22 @@ License Version 2.0开源协议。
 
 #### 前端地址:
 
+Gitee： https://gitee.com/kcsen/campus-partner-frontend.git
+
+Github： https://github.com/kongshier/campus-partner-frontend.git
 
 #### 后端地址:
+Gitee：https://gitee.com/kcsen/campus-backend-master.git
 
+GitHub：https://github.com/kongshier/campus-backend-master.git
 
 ## 在线体验
 
+http://pt.kongshier.top
 
 账号可以自行注册，一切聊天、评论需遵守中华人民共和国有关法律规定。
 
-仅支持中国大陆手机号，若没有符合要求的手机号或本网站短信功能无法使用，请使用以下账号直接登录：
+仅支持有效手机号注册，请使用以下账号直接登录：
 
 账号：admin
 
@@ -46,20 +52,20 @@ License Version 2.0开源协议。
 
 ## 项目背景
 
-许多热爱编程比赛的用户在参加比赛时常常面临没有队友的问题，这使得他们很难发挥自己的实力，也很难取得好成绩。同时，许多用户在寻找队友时也面临一些困难，比如无法找到合适的人选，或者无法与潜在的队友进行充分的交流和沟通。因此，我们希望通过该网站，为这些用户提供一个交流平台，帮助他们找到理想的队友，组建强大的编程团队，参加各种编程比赛，并最终实现自己的编程梦想。
+许多热爱学习竞赛的校园同学在参加比赛时常常面临没有队友的问题，这使得他们很难发挥自己的实力，也很难取得好成绩。同时，许多用户在寻找队友时也面临一些困难，比如无法找到合适的人选，或者无法与潜在的队友进行充分的交流和沟通。因此，我们希望通过该网站，为这些用户提供一个交流平台，帮助他们找到理想的队友，组建强大的竞赛团队，参加各种校园比赛，并最终实现自己的梦想。
 
 ## 核心功能
 
 1. 用户注册和登录：用户可以通过注册账号并登录使用该网站。
 2. 标签匹配：用户可以选择自己的技能和需求标签，系统会根据标签匹配合适的队友。
-3. 组队功能：用户可以与其他用户组建队伍，一起参加编程比赛。
+3. 组队功能：用户可以与其他用户组建队伍，一起参加校园竞赛。
 4. 帖文发布、点赞和关注：用户可以发布自己的帖文，其他用户可以对其进行点赞和关注，以便更好地了解和交流。
 5. 实时聊天：队伍中的用户可以进行实时聊天，方便沟通和协作。
 6. 用户管理：管理员可以对用户进行管理，包括审核用户信息和处理用户投诉等。
 
-## 项目亮点
+## 项目亮点 
 
-1. 用户登录：使用 Redis 实现分布式 Session，解决集群间登录态同步问题；使用token储存用户信息并实现续签和超时自动退出。
+1. 用户登录：使用 Redis 实现分布式 Session，解决集群间登录态同步问题；使用 token 储存用户信息并实现续签和超时自动退出。
 
 2. 对于项目中复杂的集合处理（比如为队伍列表关联已加入队伍的用户），使用 Java 8 Stream API 和 Lambda 表达式来简化编码。
 
@@ -75,18 +81,19 @@ License Version 2.0开源协议。
 
 8. 使用阿里云对象存储用户头像、队伍图片
 
-9. 使用WebSocket在单个TCP连接上进行全双工通信，创建持久性的连接，实现队伍聊天室中的实时聊天。
+9. 用户可以每天签到一次
 
-10. 前端使用 Vant UI 组件库，并封装了全局通用的 Layout 组件，使主页、搜索页、组队页布局一致、并减少重复代码。
+10. 使用 WebSocket 在单个TCP连接上进行全双工通信，创建持久性的连接，实现队伍聊天室中的实时聊天。
 
-11. 基于 Vue Router 全局路由守卫实现了根据不同页面来动态切换导航栏标题， 并通过在全局路由配置文件扩展 title 字段来减少无意义的
-    if else 代码。
+11. 前端使用 Vant4 UI 组件库，并封装了全局通用的 Layout 组件，使主页、搜索页、组队页布局一致、并减少重复代码。
 
-12. 使用component is标签自定义少数页面的基本布局，优化用户体验。
+12. 基于 Vue Router 全局路由守卫实现了根据不同页面来动态切换导航栏标题， 并通过在全局路由配置文件扩展 title 字段来减少无意义的 if else 代码。
 
-13. 封装前端卡片组件，对数据做统一处理，减少重复代码。
+13. 使用 component is 标签自定义少数页面的基本布局，优化用户体验。
 
-14. 使用defineEmits为子组件绑定事件，并使用emits将事件发送给父组件，优化用户在操作后的体验。
+14. 封装前端卡片组件，对数据做统一处理，减少重复代码。
+
+15. 使用 defineEmits 为子组件绑定事件，并使用 emits 将事件发送给父组件，优化用户在操作后的体验。
 
 ## 技术选型
 
@@ -96,7 +103,7 @@ License Version 2.0开源协议。
 
 - Vite 脚手架
 
-- Vant UI 移动端组件库
+- Vant4 UI 移动端组件库
 
 - Axios 请求库
 
@@ -110,7 +117,7 @@ License Version 2.0开源协议。
 
 - Mybatis X 根据数据库表生成对应的mapper、service、model代码
 
-- Redis缓存
+- Redis 缓存
 
 - Redisson 分布式锁
 
@@ -124,13 +131,14 @@ License Version 2.0开源协议。
 
 - WebSocket
 
-### 软件架构
+- 阿里云对象存储 OSS
 
-![image-20230623201717125](doc/images/1.png)
+### 软件架构
+![架构图](./readmeimages/README-1694925656896.png)
 
 ### 数据库架构
 
-![image-20230623203721932](doc/images/2.jpg)
+![image-20230623203721932](readmeimages/2.jpg)
 
 ## 后端部署
 
@@ -140,7 +148,7 @@ License Version 2.0开源协议。
    maven install
    ```
 
-2. 新建super数据库，并执行super.sql
+2. 新建 campus 数据库，并执行 campus.sql
 3. 运行SuperApplication
 
 > (暂不支持)修改application.xml，其中spring.mail为非必填项，不填写则无法发送邮件
@@ -168,7 +176,7 @@ License Version 2.0开源协议。
 
 2）注册成功后将跳转至标签编辑页，用户可选择与自己匹配的标签，也可以自定义标签。若希望以后再填写，可以点击右上角跳过。
 
-> 暂时支持（可以访问原作者：http://ochiamalu.xyz）
+> 暂时支持（可以访问原作者作品：http://ochiamalu.xyz）
 >1. 击发送验证码后显示验证码输入框，并进入60秒倒计时，在此期间不可再次发送验证码。**注意：用户名为登录所用。**
 >2. 若配置正确将发送短信至手机号，若不进行配置可将验证码打印至控制台。
 
@@ -279,5 +287,55 @@ License Version 2.0开源协议。
 
 7）粉丝：展示用户的粉丝。
 
+### 好友模块
+1）申请好友：可以发送好友申请。
+
+2）申请列表：展示所有申请好友的用户
+
+3）同意添加好友
+
+4）拒绝添加好友
 
 
+### 签到
+1）签到：用户每天签到一次
+
+
+## 部分界面展示
+
+**登录界面**
+
+![登陆界面](./readmeimages/README-1694926446141.png)
+
+**首页**
+
+![系统首页](./readmeimages/README-1694926472519.png)
+
+**博文界面**
+
+![博文界面](./readmeimages/README-1694926666536.png)
+
+
+**队伍界面**
+
+![队伍界面](./readmeimages/README-1694926517799.png)
+
+**发布博文界面**
+
+![发布博文](./readmeimages/README-1694926543388.png)
+
+**消息中心界面**
+
+![消息中心](./readmeimages/README-1694926573196.png)
+
+**我的界面**
+
+![我的界面](./readmeimages/README-1694926599971.png)
+
+**个人信息界面**
+
+![个人信息界面](./readmeimages/README-1694926619945.png)
+
+**根据标签搜索界面**
+
+![标签搜索界面](./readmeimages/README-1694926696601.png)

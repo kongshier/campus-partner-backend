@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.shier.common.BaseResponse;
 import com.shier.common.ErrorCode;
 import com.shier.common.ResultUtils;
+import com.shier.manager.RedisLimiterManager;
 import com.shier.model.domain.Team;
 import com.shier.model.domain.User;
 import com.shier.model.domain.UserTeam;
@@ -39,7 +40,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/team")
 @Api(tags = "队伍管理模块")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://partner.kongshier.top"}, allowCredentials = "true")
 public class TeamController {
     /**
      * 团队服务
@@ -58,6 +58,9 @@ public class TeamController {
      */
     @Resource
     private UserTeamService userTeamService;
+
+    @Resource
+    private RedisLimiterManager redisLimiterManager;
 
 //    /**
 //     * 布隆过滤器
@@ -85,6 +88,11 @@ public class TeamController {
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        // 限流
+        boolean doRateLimit = redisLimiterManager.doRateLimit(loginUser.getId().toString());
+        if (!doRateLimit) {
+            throw new BusinessException(ErrorCode.TOO_MANY_REQUEST);
         }
         Team team = new Team();
         BeanUtil.copyProperties(teamAddRequest, team);
@@ -373,7 +381,7 @@ public class TeamController {
      * 踢出队员
      *
      * @param teamKickOutRequest 踢出队员请求
-     * @param request                请求
+     * @param request            请求
      * @return {@link BaseResponse}<{@link String}>
      */
     @PostMapping("/kick")
@@ -409,10 +417,10 @@ public class TeamController {
         try {
             List<TeamVO> teamList = teamPage.getRecords();
             List<Long> teamIdList = teamList.stream().map(TeamVO::getId).collect(Collectors.toList());
-            //判断当前用户已加入的队伍
+            // 判断当前用户已加入的队伍
             LambdaQueryWrapper<UserTeam> userTeamLambdaQueryWrapper = new LambdaQueryWrapper<>();
             userTeamLambdaQueryWrapper.eq(UserTeam::getUserId, loginUser.getId()).in(UserTeam::getTeamId, teamIdList);
-            //用户已加入的队伍
+            // 用户已加入的队伍
             List<UserTeam> userTeamList = userTeamService.list(userTeamLambdaQueryWrapper);
             Set<Long> joinedTeamIdList = userTeamList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
             teamList.forEach(team -> {

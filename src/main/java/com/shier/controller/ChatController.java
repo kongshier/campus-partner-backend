@@ -29,6 +29,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/chat")
 @Api(tags = "聊天管理模块")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://pt.kongshier.top"}, allowCredentials = "true")
 public class ChatController {
     /**
      * 聊天服务

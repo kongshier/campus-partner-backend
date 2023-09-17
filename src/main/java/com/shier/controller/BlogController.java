@@ -5,6 +5,7 @@ import com.shier.common.BaseResponse;
 import com.shier.common.ErrorCode;
 import com.shier.common.ResultUtils;
 import com.shier.exception.BusinessException;
+import com.shier.manager.RedisLimiterManager;
 import com.shier.model.domain.User;
 import com.shier.model.request.BlogAddRequest;
 import com.shier.model.request.BlogUpdateRequest;
@@ -30,7 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 @RequestMapping("/blog")
 @Api(tags = "博文管理模块")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://partner.kongshier.top"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://pt.kongshier.top"}, allowCredentials = "true")
 public class BlogController {
     /**
      * 博客服务
@@ -43,6 +44,9 @@ public class BlogController {
      */
     @Resource
     private UserService userService;
+
+    @Resource
+    private RedisLimiterManager redisLimiterManager;
 
 //    /**
 //     * 布隆过滤器
@@ -87,6 +91,11 @@ public class BlogController {
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        // 限流
+        boolean doRateLimit = redisLimiterManager.doRateLimit(loginUser.getId().toString());
+        if (!doRateLimit) {
+            throw new BusinessException(ErrorCode.TOO_MANY_REQUEST);
         }
         if (StringUtils.isAnyBlank(blogAddRequest.getTitle(), blogAddRequest.getContent())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"内容不能为空");

@@ -28,7 +28,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/follow")
 @Api(tags = "关注管理模块")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://partner.kongshier.top"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://pt.kongshier.top"}, allowCredentials = "true")
 public class FollowController {
     /**
      * 关注服务

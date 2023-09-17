@@ -4,6 +4,7 @@ import com.shier.common.BaseResponse;
 import com.shier.common.ErrorCode;
 import com.shier.common.ResultUtils;
 import com.shier.exception.BusinessException;
+import com.shier.manager.RedisLimiterManager;
 import com.shier.model.domain.User;
 import com.shier.model.request.AddCommentRequest;
 import com.shier.model.vo.BlogCommentsVO;
@@ -29,7 +30,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/comments")
 @Api(tags = "博文评论管理模块")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://partner.kongshier.top"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://pt.kongshier.top"}, allowCredentials = "true")
 public class BlogCommentsController {
     /**
      * 博客评论服务
@@ -42,6 +43,9 @@ public class BlogCommentsController {
      */
     @Resource
     private UserService userService;
+
+    @Resource
+    private RedisLimiterManager redisLimiterManager;
 
     /**
      * 添加评论
@@ -59,6 +63,11 @@ public class BlogCommentsController {
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        // 限流
+        boolean doRateLimit = redisLimiterManager.doRateLimit(loginUser.getId().toString());
+        if (!doRateLimit) {
+            throw new BusinessException(ErrorCode.TOO_MANY_REQUEST);
         }
         if (addCommentRequest.getBlogId() == null || StringUtils.isBlank(addCommentRequest.getContent())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);

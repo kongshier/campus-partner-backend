@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/friends")
 @Api(tags = "好友管理模块")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://partner.kongshier.top"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://pt.kongshier.top"}, allowCredentials = "true")
 public class FriendsController {
     /**
      * 好友服务

@@ -9,7 +9,7 @@ package com.shier.constants;
 public interface RedisConstants {
     String LOGIN_USER_KEY = "campus:login:token:";
 
-    Long LOGIN_USER_TTL = 15L;
+    Long LOGIN_USER_TTL = 300L;
     /**
      * 注册验证码键
      */
@@ -25,7 +25,7 @@ public interface RedisConstants {
     /**
      * 用户更新电话过期时间
      */
-    Long USER_UPDATE_PHONE_TTL = 15L;
+    Long USER_UPDATE_PHONE_TTL = 30L;
     /**
      * 用户更新邮件键
      */

@@ -27,7 +27,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         JacksonObjectMapper objectMapper = new JacksonObjectMapper();
-        //重写日期格式
+        // 重写日期格式
         SimpleDateFormat smt = new SimpleDateFormat("yyyy-MM-dd");
         objectMapper.setDateFormat(smt);
         converter.setObjectMapper(objectMapper);
@@ -42,14 +42,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                //设置允许跨域请求的域名
-                //当**Credentials为true时，**Origin不能为星号，需为具体的ip地址【如果接口不带cookie,ip无需设成具体ip】
-                .allowedOrigins("http://localhost:5173", "http://127.0.0.1:5173","http://partner.kongshier.top")
-                //是否允许证书 不再默认开启
+                // 设置允许跨域请求的域名
+                // 当**Credentials为true时，**Origin不能为星号，需为具体的ip地址【如果接口不带cookie,ip无需设成具体ip】
+                .allowedOriginPatterns("http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://pt.kongshier.top/api", "http://pt.kongshier.top")
+                // 是否允许证书 不再默认开启
                 .allowCredentials(true)
-                //设置允许的方法
+                // 设置允许的方法
                 .allowedMethods("*")
-                //跨域允许时间
+                // 跨域允许时间
                 .maxAge(3600);
     }
 }
