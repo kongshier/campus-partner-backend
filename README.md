@@ -29,14 +29,14 @@ License Version 2.0开源协议。
 
 #### 前端地址:
 
-Gitee： https://gitee.com/kcsen/campus-partner-frontend.git
+Gitee： https://gitee.com/kcsen/campus-partner-frontend
 
-Github： https://github.com/kongshier/campus-partner-frontend.git
+Github： https://github.com/kongshier/campus-partner-frontend
 
 #### 后端地址:
-Gitee：https://gitee.com/kcsen/campus-backend-master.git
+Gitee：https://gitee.com/kcsen/campus-backend-master
 
-GitHub：https://github.com/kongshier/campus-backend-master.git
+GitHub：https://github.com/kongshier/campus-backend-master
 
 ## 在线体验
 
