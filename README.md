@@ -38,6 +38,11 @@ Gitee：https://gitee.com/kcsen/campus-backend-master
 
 GitHub：https://github.com/kongshier/campus-backend-master
 
+#### 管理系统
+Gitee：https://gitee.com/kcsen/campus-partner-admin
+Github：https://github.com/kongshier/campus-partner-admin
+
+
 ## 在线体验
 
 http://47.121.118.209:7101
