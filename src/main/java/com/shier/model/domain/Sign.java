@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.sql.Timestamp;
 import java.util.Date;
 
 /**
@@ -37,7 +37,7 @@ public class Sign implements Serializable {
      * 签到的日期
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "zh", timezone = "GMT+8")
-    private LocalDate signDate;
+    private Timestamp signDate;
 
     /**
      * 更新时间

@@ -38,8 +38,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -359,16 +362,19 @@ public class UserController {
     @ApiImplicitParams(
             {@ApiImplicitParam(name = "id", value = "用户id"),
                     @ApiImplicitParam(name = "request", value = "request请求")})
-    public BaseResponse<Boolean> deleteUser(@RequestBody long id, HttpServletRequest request) {
+    public BaseResponse<Boolean> deleteUser(Long id, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        if (loginUser.getId().equals(id)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "无法删除自己");
         }
         if (!userService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
         if (id <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "id不存在");
         }
         boolean b = userService.removeById(id);
         return ResultUtils.success(b);
@@ -516,10 +522,6 @@ public class UserController {
             {@ApiImplicitParam(name = "id", value = "用户id"),
                     @ApiImplicitParam(name = "request", value = "request请求")})
     public BaseResponse<UserVO> getUserById(@PathVariable Long id, HttpServletRequest request) {
-//        boolean contains = bloomFilter.contains(USER_BLOOM_PREFIX + id);
-//        if (!contains) {
-//            return ResultUtils.success(null);
-//        }
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
@@ -592,12 +594,18 @@ public class UserController {
         if (userId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // 获取今天的时间
-        LocalDate signDate = LocalDate.now();
+
+        // 获取今天的日期
+        LocalDate todaySign = LocalDate.now();
+        // 获取今天的开始时间和结束时间
+        Timestamp startTimestamp = Timestamp.valueOf(todaySign.atStartOfDay());
+        // 也可以使用 LocalTime.of(23, 59, 59)
+        Timestamp endTimestamp = Timestamp.valueOf(todaySign.atTime(LocalTime.MAX));
+
         // 判断今天是否已经签到过
         Sign signToday = signService.getOne(new QueryWrapper<Sign>()
                 .eq("user_id", userId)
-                .eq("sign_date", signDate));
+                .between("sign_date", startTimestamp, endTimestamp));
         if (signToday != null) {
             // 如果已经签到，直接返回签到记录
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "今天已签到");
@@ -610,7 +618,7 @@ public class UserController {
             }
             Sign newSign = new Sign();
             newSign.setUserId(userId);
-            newSign.setSignDate(signDate);
+            newSign.setSignDate(Timestamp.valueOf(LocalDateTime.now()));
             boolean success = signService.save(newSign);
             if (!success) {
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "保存失败");

@@ -93,7 +93,7 @@ CREATE TABLE `chat`
     `to_id`       bigint(20)                                                    NULL DEFAULT NULL COMMENT '接收消息id',
     `text`        varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
     `chat_type`   tinyint(4)                                                    NOT NULL COMMENT '聊天类型 1-私聊 2-群聊',
-    `is_read`     tinyint                                                            default 0 null comment '是否已读 1-已读 2-未读',
+    `is_read`     tinyint                                                       default 0 null comment '是否已读 1-已读 2-未读',
     `create_time` datetime                                                      NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime                                                      NULL DEFAULT CURRENT_TIMESTAMP,
     `team_id`     bigint(20)                                                    NULL DEFAULT NULL,
@@ -191,7 +191,7 @@ CREATE TABLE `sign`
 (
     `id`          bigint AUTO_INCREMENT COMMENT '主键' PRIMARY KEY,
     `user_id`     bigint     NOT NULL COMMENT '用户id',
-    `sign_date`   DATE       NOT NULL COMMENT '签到的日期',
+    `sign_date`   datetime   NOT NULL COMMENT '签到的日期',
     `update_time` datetime   NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `create_time` datetime   NULL     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `is_backup`   tinyint(1) NOT NULL default 0 COMMENT '是否补签 0-不补签 1-补签'
