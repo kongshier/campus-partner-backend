@@ -40,7 +40,7 @@ GitHub：https://github.com/kongshier/campus-backend-master
 
 ## 在线体验
 
-http://pt.kongshier.top
+http://47.121.118.209:7101
 
 账号可以自行注册，一切聊天、评论需遵守中华人民共和国有关法律规定。
 
