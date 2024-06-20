@@ -88,21 +88,18 @@ CREATE TABLE `blog_like`
 DROP TABLE IF EXISTS `chat`;
 CREATE TABLE `chat`
 (
-    `id`          bigint(20)                                                    NOT NULL AUTO_INCREMENT COMMENT '聊天记录id',
+    `id`          bigint(20) PRIMARY KEY                                        NOT NULL AUTO_INCREMENT COMMENT '聊天记录id',
     `from_id`     bigint(20)                                                    NOT NULL COMMENT '发送消息id',
     `to_id`       bigint(20)                                                    NULL DEFAULT NULL COMMENT '接收消息id',
     `text`        varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
     `chat_type`   tinyint(4)                                                    NOT NULL COMMENT '聊天类型 1-私聊 2-群聊',
+    `is_read`     tinyint                                                            default 0 null comment '是否已读 1-已读 2-未读',
     `create_time` datetime                                                      NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime                                                      NULL DEFAULT CURRENT_TIMESTAMP,
     `team_id`     bigint(20)                                                    NULL DEFAULT NULL,
-    `is_delete`   tinyint(4)                                                    NULL DEFAULT 0,
-    PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 37
-  CHARACTER SET = utf8mb4
-  COLLATE = utf8mb4_general_ci COMMENT = '聊天消息表'
-  ROW_FORMAT = Compact;
+    `is_delete`   tinyint(4)                                                    NULL DEFAULT 0
+)
+    COLLATE = utf8mb4_general_ci COMMENT = '聊天消息表';
 
 -- ----------------------------
 -- 评论点赞表
@@ -231,10 +228,10 @@ DROP TABLE IF EXISTS `team`;
 CREATE TABLE `team`
 (
     `id`          bigint(20)                                                     NOT NULL AUTO_INCREMENT COMMENT 'id',
-    `name`        varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci  NOT NULL COMMENT '队伍名称',
+    `name`        varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci  NULL COMMENT '队伍名称',
     `description` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL     DEFAULT NULL COMMENT '描述',
     `cover_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci  NULL     DEFAULT NULL COMMENT '封面图片',
-    `max_num`     int(11)                                                        NOT NULL DEFAULT 1 COMMENT '最大人数',
+    `max_num`     int(11)                                                        NOT NULL DEFAULT 10 COMMENT '最大人数',
     `expire_time` datetime                                                       NULL     DEFAULT NULL COMMENT '过期时间',
     `user_id`     bigint(20)                                                     NULL     DEFAULT NULL COMMENT '用户id',
     `status`      int(11)                                                        NOT NULL DEFAULT 0 COMMENT '0 - 公开，1 - 私有，2 - 加密',
@@ -260,7 +257,7 @@ CREATE TABLE `user`
     `password`     varchar(512) CHARACTER SET utf8 COLLATE utf8_general_ci  NOT NULL COMMENT '用户密码',
     `user_account` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci  NULL     DEFAULT NULL COMMENT '账号',
     `avatar_url`   varchar(1024) CHARACTER SET utf8 COLLATE utf8_general_ci NULL     DEFAULT NULL COMMENT '用户头像',
-    `gender`       tinyint(4)                                                        DEFAULT 1 NULL DEFAULT NULL COMMENT '性别 0-女 1-男 2-保密',
+    `gender`       tinyint(4)                                               NOT NULL DEFAULT 1 COMMENT '性别 0-女 1-男 2-保密',
     `profile`      varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci  NULL     DEFAULT NULL,
     `phone`        varchar(128) CHARACTER SET utf8 COLLATE utf8_general_ci  NULL     DEFAULT NULL COMMENT '手机号',
     `email`        varchar(512) CHARACTER SET utf8 COLLATE utf8_general_ci  NULL     DEFAULT NULL COMMENT '邮箱',
@@ -273,11 +270,21 @@ CREATE TABLE `user`
     `is_delete`    tinyint(4)                                               NOT NULL DEFAULT 0 COMMENT '是否删除',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE INDEX `uniIdx_account` (`user_account`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 1000040
-  CHARACTER SET = utf8
-  COLLATE = utf8_general_ci
-  ROW_FORMAT = DYNAMIC;
+) comment '用户表' row_format = COMPACT;
+
+
+create table if not exists config
+(
+    id          bigint auto_increment comment '主键'
+        primary key,
+    value       varchar(255)                        null comment '数据',
+    type        tinyint                             null comment '0-通知栏 1-轮播图',
+    create_time timestamp default CURRENT_TIMESTAMP not null comment '创建时间',
+    update_time timestamp default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    is_delete   tinyint   default 0                 null comment '逻辑删除'
+)
+    charset = utf8
+    row_format = COMPACT;
 
 -- ----------------------------
 -- 用户队伍表

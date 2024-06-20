@@ -2,10 +2,14 @@ package com.shier.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.shier.annotation.AuthCheck;
 import com.shier.common.BaseResponse;
 import com.shier.common.ErrorCode;
 import com.shier.common.ResultUtils;
+import com.shier.constants.UserConstants;
+import com.shier.exception.BusinessException;
 import com.shier.manager.RedisLimiterManager;
 import com.shier.model.domain.Team;
 import com.shier.model.domain.User;
@@ -20,7 +24,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import com.shier.exception.BusinessException;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -31,6 +36,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.shier.constants.SystemConstants.PAGE_SIZE;
+import static com.shier.constants.UserConstants.ADMIN_ROLE;
+
 /**
  * 队伍控制器
  *
@@ -40,6 +48,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/team")
 @Api(tags = "队伍管理模块")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://47.121.118.209", "http://localhost:5174"}, allowCredentials = "true")
 public class TeamController {
     /**
      * 团队服务
@@ -127,7 +136,6 @@ public class TeamController {
         return ResultUtils.success(true);
     }
 
-
     /**
      * 通过id获取团队
      *
@@ -142,10 +150,6 @@ public class TeamController {
         if (id == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-//        boolean contains = bloomFilter.contains(String.valueOf(id));
-//        if (!contains) {
-//            return ResultUtils.success(null);
-//        }
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
@@ -154,7 +158,7 @@ public class TeamController {
     }
 
     /**
-     * 团队名单
+     * 队伍列表
      *
      * @param currentPage      当前页面
      * @param teamQueryRequest 团队查询请求
@@ -448,5 +452,110 @@ public class TeamController {
         });
         teamVOPage.setRecords(teamList);
         return teamVOPage;
+    }
+
+
+    /**
+     * 管理员队伍列表
+     *
+     * @param teamQueryRequest 团队查询请求
+     * @param request          请求
+     * @return {@link BaseResponse}<{@link Page}<{@link TeamVO}>>
+     */
+    @GetMapping("/admin/list/page")
+    @ApiOperation(value = "管理员获取队伍列表")
+    @ApiImplicitParams({@ApiImplicitParam(name = "teamQueryRequest", value = "队伍查询请求参数"),
+            @ApiImplicitParam(name = "request", value = "request请求")})
+    public BaseResponse<Page<Team>> listAdminTeams(TeamQueryRequest teamQueryRequest, HttpServletRequest request) {
+        if (teamQueryRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        if (!loginUser.getRole().equals(ADMIN_ROLE)) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        long current = teamQueryRequest.getCurrent();
+        long size = teamQueryRequest.getPageSize();
+        Page<Team> teamPage = teamService.page(new Page<>(current, size), teamService.getQueryWrapper(teamQueryRequest));
+        return ResultUtils.success(teamPage);
+    }
+
+    /**
+     * 按队伍名称搜索
+     */
+    @GetMapping("/admin/search")
+    @ApiOperation(value = "通过队伍名称搜索用户")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(name = "name", value = "用户名"),
+                    @ApiImplicitParam(name = "request", value = "request请求")})
+    public BaseResponse<Page<Team>> searchTeamByTeamName(String name, Long currentPage, HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        if (!userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like(StringUtils.isNotBlank(name), "name", name);
+        Page<Team> teamPages = teamService.page(new Page<>(currentPage, PAGE_SIZE), queryWrapper);
+        return ResultUtils.success(teamPages);
+    }
+
+
+    /**
+     * 管理员更新队伍信息
+     *
+     * @param teamUpdateRequest
+     * @return
+     */
+    @PostMapping("/admin/update")
+    @AuthCheck(adminRole = UserConstants.ADMIN_ROLE)
+    @ApiOperation(value = "管理员更新信息")
+    public BaseResponse<String> updateQuestion(@RequestBody TeamUpdateRequest teamUpdateRequest, HttpServletRequest request) {
+        if (teamUpdateRequest == null || teamUpdateRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        if (!loginUser.getRole().equals(ADMIN_ROLE)) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        Team team = new Team();
+        BeanUtils.copyProperties(teamUpdateRequest, team);
+        boolean updatedResult = teamService.updateById(team);
+        if (updatedResult) {
+            return ResultUtils.success("更新成功！");
+        } else {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+    }
+
+    /**
+     * 管理员删除团队
+     *
+     * @param request       请求
+     * @return {@link BaseResponse}<{@link Boolean}>
+     */
+    @PostMapping("/admin/delete/{id}")
+    @ApiOperation(value = "解散队伍")
+    @ApiImplicitParams({@ApiImplicitParam(name = "id", value = "解散队伍请求参数"),
+            @ApiImplicitParam(name = "request", value = "request请求")})
+    public BaseResponse<Boolean> deleteTeamByAdmin(@PathVariable Long id, HttpServletRequest request) {
+        if (id == null || id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        boolean isAdmin = userService.isAdmin(loginUser);
+        boolean result = teamService.deleteTeam(id, loginUser, isAdmin);
+        if (!result) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除失败");
+        }
+        return ResultUtils.success(true);
     }
 }

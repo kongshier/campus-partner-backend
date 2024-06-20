@@ -1,6 +1,7 @@
 package com.shier.service;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.shier.model.domain.Team;
@@ -13,10 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
-* @author Shier
-* @description 针对表【team(队伍)】的数据库操作Service
-* @createDate 2023-05-12 19:33:37
-*/
+ * @author Shier
+ * @description 针对表【team(队伍)】的数据库操作Service
+ * @createDate 2023-05-12 19:33:37
+ */
 public interface TeamService extends IService<Team> {
 
     @Transactional(rollbackFor = Exception.class)
@@ -31,9 +32,9 @@ public interface TeamService extends IService<Team> {
     @Transactional(rollbackFor = Exception.class)
     boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser);
 
-    boolean deleteTeam(long id, User loginUser,boolean isAdmin);
+    boolean deleteTeam(long id, User loginUser, boolean isAdmin);
 
-    TeamVO getTeam(Long teamId,Long userId);
+    TeamVO getTeam(Long teamId, Long userId);
 
     Page<TeamVO> listMyJoin(long currentPage, TeamQueryRequest teamQuery);
 
@@ -43,7 +44,17 @@ public interface TeamService extends IService<Team> {
 
     void changeCoverImage(TeamCoverUpdateRequest request, Long userId, boolean admin);
 
-    void kickOut(Long teamId, Long userId, Long loginUserId,boolean admin);
+    void kickOut(Long teamId, Long userId, Long loginUserId, boolean admin);
 
     Page<TeamVO> listMyCreate(long currentPage, Long userId);
+
+    /**
+     * 获取查询条件
+     *
+     * @param teamQueryRequest
+     * @return
+     */
+    QueryWrapper<Team> getQueryWrapper(TeamQueryRequest teamQueryRequest);
+
+    Team getSearchTeam(Team originTeam);
 }

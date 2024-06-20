@@ -1,13 +1,13 @@
 package com.shier.model.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
-
-import java.io.Serializable;
-import java.util.Date;
-
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 聊天
@@ -52,15 +52,23 @@ public class Chat implements Serializable {
     private Integer chatType;
 
     /**
+     * 是否已读 1-已读 2-未读
+     */
+    @ApiModelProperty(value = "是否已读")
+    private Integer isRead;
+
+    /**
      * 创建时间
      */
     @ApiModelProperty(value = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "zh", timezone = "GMT+8")
     private Date createTime;
 
     /**
      * 更新时间
      */
     @ApiModelProperty(value = "更新时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "zh", timezone = "GMT+8")
     private Date updateTime;
 
     /**

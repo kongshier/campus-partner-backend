@@ -5,20 +5,20 @@ import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.shier.common.ErrorCode;
-import com.shier.constants.UserConstants;
 import com.shier.exception.BusinessException;
 import com.shier.mapper.UserMapper;
 import com.shier.model.domain.Follow;
 import com.shier.model.domain.User;
+import com.shier.model.request.UserRegisterRequest;
 import com.shier.model.request.UserUpdateRequest;
 import com.shier.model.vo.UserVO;
 import com.shier.service.FollowService;
-import com.shier.service.SignService;
 import com.shier.service.UserService;
 import com.shier.utils.AlgorithmUtil;
 import javafx.util.Pair;
@@ -41,9 +41,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.shier.constants.RedisConstants.*;
-import static com.shier.constants.SystemConstants.DEFAULT_CACHE_PAGE;
-import static com.shier.constants.SystemConstants.PAGE_SIZE;
-import static com.shier.constants.UserConstants.USER_LOGIN_STATE;
+import static com.shier.constants.SystemConstants.*;
+import static com.shier.constants.UserConstants.*;
 
 /**
  * @author Shier
@@ -54,19 +53,7 @@ import static com.shier.constants.UserConstants.USER_LOGIN_STATE;
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
-    private static final String[] avatarUrls = {
-            "https://shierprojectes.oss-cn-guangzhou.aliyuncs.com/images/catImage/1.jpg",
-            "https://shierprojectes.oss-cn-guangzhou.aliyuncs.com/images/catImage/2.jpg",
-            "https://shierprojectes.oss-cn-guangzhou.aliyuncs.com/images/catImage/3.jpg",
-            "https://shierprojectes.oss-cn-guangzhou.aliyuncs.com/images/catImage/4.jpg",
-            "https://shierprojectes.oss-cn-guangzhou.aliyuncs.com/images/catImage/5.jpg",
-            "https://shierprojectes.oss-cn-guangzhou.aliyuncs.com/images/catImage/6.jpg",
-            "https://shierprojectes.oss-cn-guangzhou.aliyuncs.com/images/catImage/7.jpg",
-            "https://shierprojectes.oss-cn-guangzhou.aliyuncs.com/images/catImage/9.jpg",
-            "https://shierprojectes.oss-cn-guangzhou.aliyuncs.com/images/catImage/10.jpg",
-            "http://niu.ochiamalu.xyz/1bff61de34bdc7bf40c6278b2848fbcf.jpg",
-            "http://niu.ochiamalu.xyz/22fe8428428c93a565e181782e97654.jpg",
-    };
+
     @Resource
     private UserMapper userMapper;
 
@@ -81,9 +68,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
-
-    @Resource
-    private SignService signService;
 
     @Override
     public long userRegister(String phone, String userAccount, String userPassword, String checkPassword) {
@@ -273,9 +257,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public boolean isAdmin(User loginUser) {
-        return loginUser != null && loginUser.getRole() == UserConstants.ADMIN_ROLE;
+        return loginUser != null && loginUser.getRole() == ADMIN_ROLE;
     }
-
 
     @Override
     public boolean updateUser(User user, HttpServletRequest request) {
@@ -611,6 +594,228 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return true;
         }).map(this::getSafetyUser).collect(Collectors.toList());
     }
+
+
+    /**
+     * 管理员注册
+     *
+     * @param userRegisterRequest 用户登记要求
+     * @param request             要求
+     * @return {@link Long}
+     */
+    @Override
+    public Long adminRegister(UserRegisterRequest userRegisterRequest, HttpServletRequest request) {
+        User loginUser = getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "未登录");
+        }
+        Integer role = loginUser.getRole();
+        if (!role.equals(ADMIN_ROLE)) {
+            throw new BusinessException(ErrorCode.NO_AUTH, "无权限");
+        }
+        String phone = userRegisterRequest.getPhone();
+        String account = userRegisterRequest.getUserAccount();
+        String password = userRegisterRequest.getUserPassword();
+        checkAccountValid(account);
+        checkAccountRepetition(account);
+        return insetUser(phone, account, password);
+    }
+
+
+    /**
+     * 插图用户
+     *
+     * @param phone    电话
+     * @param account  账户
+     * @param password 暗语
+     * @return long
+     */
+    private long insetUser(String phone, String account, String password) {
+        // 2. 加密
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
+        // 3. 插入数据
+        User user = new User();
+        Random random = new Random();
+        user.setAvatarUrl(avatarUrls[random.nextInt(avatarUrls.length)]);
+        user.setPhone(phone);
+        user.setUsername(account);
+        user.setUserAccount(account);
+        user.setPassword(encryptPassword);
+        ArrayList<String> tag = new ArrayList<>();
+        Gson gson = new Gson();
+        String jsonTag = gson.toJson(tag);
+        user.setTags(jsonTag);
+        boolean saveResult = this.save(user);
+        if (!saveResult) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+        return user.getId();
+    }
+
+    /**
+     * 之后插入用户
+     *
+     * @param key     钥匙
+     * @param userId  用户id
+     * @param request 要求
+     * @return {@link String}
+     */
+    @Override
+    public String afterInsertUser(String key, long userId, HttpServletRequest request) {
+        stringRedisTemplate.delete(key);
+        User userInDatabase = this.getById(userId);
+        User safetyUser = this.getSafetyUser(userInDatabase);
+        String token = UUID.randomUUID().toString(true);
+        Gson gson = new Gson();
+        String userStr = gson.toJson(safetyUser);
+        request.getSession().setAttribute(USER_LOGIN_STATE, safetyUser);
+        request.getSession().setMaxInactiveInterval(MAXIMUM_LOGIN_IDLE_TIME);
+        stringRedisTemplate.opsForValue().set(LOGIN_USER_KEY + token, userStr);
+        stringRedisTemplate.expire(LOGIN_USER_KEY + token, Duration.ofSeconds(MAXIMUM_LOGIN_IDLE_TIME));
+        return token;
+    }
+
+    /**
+     * 手机号码验证
+     *
+     * @param account 账户
+     */
+    private void checkAccountValid(String account) {
+        String validPattern = "^[a-zA-Z][a-zA-Z0-9_]{4,15}$";
+        Matcher matcher = Pattern.compile(validPattern).matcher(account);
+        if (!matcher.find()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请输入正确的手机号码");
+        }
+    }
+
+    /**
+     * 账号重复
+     *
+     * @param account 账户
+     */
+    private void checkAccountRepetition(String account) {
+        LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        userLambdaQueryWrapper.eq(User::getUserAccount, account);
+        long count = this.count(userLambdaQueryWrapper);
+        if (count > 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "此账号已存在！");
+        }
+    }
+
+    /**
+     * 管理员登录
+     *
+     * @param userAccount  用户账户
+     * @param userPassword 用户暗语
+     * @param request      要求
+     * @return {@link String}
+     */
+    @Override
+    public String adminLogin(String userAccount, String userPassword, HttpServletRequest request) {
+        // 1. 校验
+        validateUserRequest(userAccount, userPassword);
+        User userInDatabase = getUserInDatabase(userAccount, userPassword);
+        if (!userInDatabase.getRole().equals(1)) {
+            throw new BusinessException(ErrorCode.NO_AUTH, "非管理员禁止登录");
+        }
+        // 3. 用户脱敏
+        User safetyUser = getSafetyUser(userInDatabase);
+        // 4. 记录用户的登录态
+        return setUserLoginState(request, safetyUser);
+    }
+
+
+    /**
+     * 取得数据库数据
+     *
+     * @param userAccount  用户账户
+     * @param userPassword 用户暗语
+     * @return {@link User}
+     */
+    public User getUserInDatabase(String userAccount, String userPassword) {
+        // 2. 加密
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+        // 查询用户是否存在
+        LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        userLambdaQueryWrapper.eq(User::getUserAccount, userAccount);
+        User userInDatabase = this.getOne(userLambdaQueryWrapper);
+        if (userInDatabase == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在");
+        }
+        if (!userInDatabase.getPassword().equals(encryptPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码错误");
+        }
+        if (!userInDatabase.getStatus().equals(0)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "该用户已被封禁");
+        }
+        return userInDatabase;
+    }
+
+
+    /**
+     * 改变用户地位
+     *
+     * @param id id
+     */
+    @Override
+    public void changeUserStatus(Long id) {
+        User user = this.getById(id);
+        LambdaUpdateWrapper<User> userLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        if (user.getStatus().equals(0)) {
+            // 状态设置为1 封禁
+            userLambdaUpdateWrapper.eq(User::getId, id).set(User::getStatus, 1);
+        } else {
+            userLambdaUpdateWrapper.eq(User::getId, id).set(User::getStatus, 0);
+        }
+        try {
+            this.update(userLambdaUpdateWrapper);
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "系统错误");
+        }
+    }
+
+    /**
+     * 验证用户请求
+     *
+     * @param userAccount  用户账户
+     * @param userPassword 用户暗语
+     */
+    public void validateUserRequest(String userAccount, String userPassword) {
+        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
+        }
+        if (userAccount.length() < MINIMUM_ACCOUNT_LEN) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号非法");
+        }
+        if (userPassword.length() < MINIMUM_PASSWORD_LEN) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码非法");
+        }
+        // 账户不能包含特殊字符
+        String validPattern = "^[a-zA-Z][a-zA-Z0-9_]{4,15}$";
+        Matcher matcher = Pattern.compile(validPattern).matcher(userAccount);
+        if (!matcher.find()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号非法");
+        }
+    }
+
+    /**
+     * 设置用户登录状态
+     *
+     * @param request    要求
+     * @param safetyUser 安全用户
+     * @return {@link String}
+     */
+    public String setUserLoginState(HttpServletRequest request, User safetyUser) {
+        request.getSession().setAttribute(USER_LOGIN_STATE, safetyUser);
+        request.getSession().setMaxInactiveInterval(MAXIMUM_LOGIN_IDLE_TIME);
+        String token = UUID.randomUUID().toString(true);
+        Gson gson = new Gson();
+        String userStr = gson.toJson(safetyUser);
+        stringRedisTemplate.opsForValue().set(LOGIN_USER_KEY + token, userStr);
+        stringRedisTemplate.expire(LOGIN_USER_KEY + token, Duration.ofSeconds(MAXIMUM_LOGIN_IDLE_TIME));
+        return token;
+    }
+
 }
 
 

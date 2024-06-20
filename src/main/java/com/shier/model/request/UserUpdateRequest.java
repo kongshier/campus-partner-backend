@@ -16,6 +16,12 @@ import java.io.Serializable;
 @ApiModel(value = "更新用户请求")
 public class UserUpdateRequest implements Serializable {
     private static final long serialVersionUID = -7852848771257290370L;
+
+    /**
+     * 用户ID
+     */
+    @ApiModelProperty(value = "用户ID")
+    private Long id;
     /**
      * 用户昵称
      */
@@ -45,6 +51,9 @@ public class UserUpdateRequest implements Serializable {
      */
     @ApiModelProperty(value = "手机号")
     private String phone;
+
+    @ApiModelProperty(value = "角色")
+    private Integer role;
 
     /**
      * 邮箱

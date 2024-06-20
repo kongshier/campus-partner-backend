@@ -1,25 +1,25 @@
-//package net.zjitc.listener;
+// package com.shier.listener;
 //
-//import cn.hutool.bloomfilter.BitSetBloomFilter;
-//import cn.hutool.bloomfilter.BloomFilter;
-//import cn.hutool.bloomfilter.BloomFilterUtil;
-//import net.zjitc.model.domain.Blog;
-//import net.zjitc.model.domain.Team;
-//import net.zjitc.model.domain.User;
-//import net.zjitc.service.BlogService;
-//import net.zjitc.service.TeamService;
-//import net.zjitc.service.UserService;
-//import org.springframework.boot.CommandLineRunner;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
+// import cn.hutool.bloomfilter.BitSetBloomFilter;
+// import cn.hutool.bloomfilter.BloomFilter;
+// import cn.hutool.bloomfilter.BloomFilterUtil;
+// import com.shier.model.domain.Blog;
+// import com.shier.model.domain.Team;
+// import com.shier.model.domain.User;
+// import com.shier.service.BlogService;
+// import com.shier.service.TeamService;
+// import com.shier.service.UserService;
+// import org.springframework.boot.CommandLineRunner;
+// import org.springframework.context.annotation.Bean;
+// import org.springframework.context.annotation.Configuration;
 //
-//import javax.annotation.Resource;
-//import java.util.List;
+// import javax.annotation.Resource;
+// import java.util.List;
 //
-//import static net.zjitc.constants.BloomFilterConstants.*;
+// import static com.shier.constants.BloomFilterConstants.*;
 //
-//@Configuration
-//public class StartupListener implements CommandLineRunner {
+// @Configuration
+// public class StartupListener implements CommandLineRunner {
 //
 //    @Resource
 //    private UserService userService;
@@ -53,4 +53,4 @@
 //        }
 //        return bloomFilter;
 //    }
-//}
+// }

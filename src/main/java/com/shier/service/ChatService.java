@@ -5,6 +5,7 @@ import com.shier.model.domain.Chat;
 import com.shier.model.domain.User;
 import com.shier.model.request.ChatRequest;
 import com.shier.model.vo.ChatMessageVO;
+import com.shier.model.vo.PrivateChatVO;
 
 import java.util.Date;
 import java.util.List;
@@ -28,4 +29,10 @@ public interface ChatService extends IService<Chat> {
     List<ChatMessageVO> getTeamChat(ChatRequest chatRequest, int teamChat, User loginUser);
 
     List<ChatMessageVO> getHallChat(int chatType, User loginUser);
+
+    List<PrivateChatVO> getPrivateList(Long id);
+
+    Integer getUnReadPrivateNum(Long userId);
+
+    Boolean readPrivateMessage(Long loginId, Long remoteId);
 }

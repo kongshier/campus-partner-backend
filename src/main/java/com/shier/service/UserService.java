@@ -4,6 +4,7 @@ package com.shier.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.shier.model.domain.User;
+import com.shier.model.request.UserRegisterRequest;
 import com.shier.model.request.UserUpdateRequest;
 import com.shier.model.vo.UserVO;
 
@@ -54,4 +55,33 @@ public interface UserService extends IService<User> {
 
     Page<UserVO> preMatchUser(long currentPage, String username, User loginUser);
 
+    /**
+     * 之后插入用户
+     *
+     * @param key     钥匙
+     * @param userId  用户id
+     * @param request 要求
+     * @return {@link String}
+     */
+    String afterInsertUser(String key, long userId, HttpServletRequest request);
+
+
+    Long adminRegister(UserRegisterRequest userRegisterRequest, HttpServletRequest request);
+
+    /**
+     * 管理员登录
+     *
+     * @param userAccount  用户账户
+     * @param userPassword 用户暗语
+     * @param request      要求
+     * @return {@link String}
+     */
+    String adminLogin(String userAccount, String userPassword, HttpServletRequest request);
+
+    /**
+     * 改变用户地位
+     *
+     * @param id id
+     */
+    void changeUserStatus(Long id);
 }

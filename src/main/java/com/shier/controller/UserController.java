@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
+import com.shier.annotation.AuthCheck;
 import com.shier.common.BaseResponse;
 import com.shier.common.ErrorCode;
 import com.shier.common.ResultUtils;
@@ -43,6 +44,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static com.shier.constants.SystemConstants.PAGE_SIZE;
+import static com.shier.constants.UserConstants.ADMIN_ROLE;
+
 
 /**
  * 用户控制器
@@ -52,7 +56,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://pt.kongshier.top"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://47.121.118.209", "http://localhost:5174"}, allowCredentials = "true")
 @Slf4j
 @Api(tags = "用户管理模块")
 public class UserController {
@@ -81,11 +85,6 @@ public class UserController {
     @Resource
     private RedisLimiterManager redisLimiterManager;
 
-//    /**
-//     * 布隆过滤器
-//     */
-//    @Resource
-//    private BloomFilter bloomFilter;
 
     /**
      * 发送消息
@@ -189,7 +188,6 @@ public class UserController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         String phone = userRegisterRequest.getPhone();
-        // String code = userRegisterRequest.getCode();
         String account = userRegisterRequest.getUserAccount();
         String password = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
@@ -206,7 +204,6 @@ public class UserController {
         request.getSession().setMaxInactiveInterval(900);
         stringRedisTemplate.opsForValue().set(RedisConstants.LOGIN_USER_KEY + token, userStr);
         stringRedisTemplate.expire(RedisConstants.LOGIN_USER_KEY + token, Duration.ofMinutes(15));
-//        bloomFilter.add(USER_BLOOM_PREFIX + userId);
         return ResultUtils.success(token);
     }
 
@@ -388,9 +385,13 @@ public class UserController {
     @ApiOperation(value = "通过标签搜索用户")
     @ApiImplicitParams(
             {@ApiImplicitParam(name = "tagNameList", value = "标签列表")})
-    public BaseResponse<Page<User>> searchUsersByTags(@RequestParam(required = false) List<String> tagNameList, long currentPage) {
+    public BaseResponse<Page<User>> searchUsersByTags(@RequestParam(required = false) List<String> tagNameList, long currentPage, HttpServletRequest request) {
         if (CollectionUtils.isEmpty(tagNameList)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
         Page<User> userList = userService.searchUsersByTags(tagNameList, currentPage);
         return ResultUtils.success(userList);
@@ -408,7 +409,7 @@ public class UserController {
     @ApiImplicitParams(
             {@ApiImplicitParam(name = "username", value = "用户名"),
                     @ApiImplicitParam(name = "request", value = "request请求")})
-    public BaseResponse<List<User>> searchUsersByUserName(String username, HttpServletRequest request) {
+    public BaseResponse<Page<User>> searchUsersByUserName(String username, Long currentPage, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
@@ -420,9 +421,12 @@ public class UserController {
         if (StringUtils.isNotBlank(username)) {
             queryWrapper.like("username", username);
         }
-        List<User> userList = userService.list(queryWrapper);
-        List<User> list = userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
-        return ResultUtils.success(list);
+        Page<User> userPage = userService.page(new Page<>(currentPage, PAGE_SIZE), queryWrapper);
+        List<User> safetyUserList = userPage.getRecords()
+                .stream().map(user -> userService.getSafetyUser(user))
+                .collect(Collectors.toList());
+        userPage.setRecords(safetyUserList);
+        return ResultUtils.success(userPage);
     }
 
     /**
@@ -615,6 +619,31 @@ public class UserController {
         }
     }
 
+    @GetMapping("/ban")
+    @ApiOperation(value = "封禁")
+    @AuthCheck(adminRole = UserConstants.ADMIN_ROLE)
+    @ApiImplicitParams(
+            {@ApiImplicitParam(name = "id", value = "用户id"),
+                    @ApiImplicitParam(name = "request", value = "request请求")})
+    public BaseResponse<Long> banUser(@RequestParam Long id, HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        if (loginUser.getId().equals(id)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN, "无法封禁自己");
+        }
+        if (!userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        if (id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "ID错误");
+        }
+        userService.changeUserStatus(id);
+        return ResultUtils.success(id);
+    }
+
+
     /**
      * 获取我的历史签到
      *
@@ -633,5 +662,106 @@ public class UserController {
         List<Sign> signList = signService.list(new QueryWrapper<Sign>().eq("user_id", loginUserId));
         log.info("我的签到次数：{}", signList.size());
         return ResultUtils.success(signList);
+    }
+
+    /**
+     * 管理系统获取当前用户
+     *
+     * @param request 请求
+     * @return {@link BaseResponse}<{@link User}>
+     */
+    @GetMapping("/admin/current")
+    @ApiOperation(value = "管理系统获取当前用户")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(name = "request", value = "request请求")})
+    public BaseResponse<User> adminGetCurrentUser(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (!loginUser.getRole().equals(ADMIN_ROLE)) {
+            throw new BusinessException(ErrorCode.NO_AUTH, "非管理员禁止登录");
+        }
+        // 用户更新标签后，取得的用户是旧数据
+        Long userId = loginUser.getId();
+        User user = userService.getById(userId);
+        User safetyUser = userService.getSafetyUser(user);
+        return ResultUtils.success(safetyUser);
+    }
+
+    /**
+     * 管理员新增用户
+     *
+     * @param userRegisterRequest 用户注册请求
+     * @param request             要求
+     * @return {@link BaseResponse}<{@link Long}>
+     */
+    @PostMapping("/admin/register")
+    @ApiOperation(value = "管理员新增用户")
+    public BaseResponse<Long> adminRegister(@RequestBody UserRegisterRequest userRegisterRequest,
+                                            HttpServletRequest request) {
+        if (userRegisterRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long flag = userService.adminRegister(userRegisterRequest, request);
+        return ResultUtils.success(flag);
+    }
+
+
+    /**
+     * 管理员登录
+     *
+     * @param userLoginRequest 用户登录请求
+     * @param request          请求
+     * @return {@link BaseResponse}<{@link User}>
+     */
+    @PostMapping("/admin/login")
+    @ApiOperation(value = "用户登录")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(name = "userLoginRequest", value = "用户登录请求参数"),
+                    @ApiImplicitParam(name = "request", value = "request请求")})
+    public BaseResponse<String> adminLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
+        if (userLoginRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String userAccount = userLoginRequest.getUserAccount();
+        String userPassword = userLoginRequest.getUserPassword();
+        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String token = userService.adminLogin(userAccount, userPassword, request);
+        return ResultUtils.success(token);
+    }
+
+
+    /**
+     * 管理员更新用户
+     *
+     * @param updateRequest 更新请求
+     * @param request       请求
+     * @return {@link BaseResponse}<{@link String}>
+     */
+    @PutMapping("/admin/update")
+    @ApiOperation(value = "管理员更新用户")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(name = "user", value = "用户更新请求参数"),
+                    @ApiImplicitParam(name = "request", value = "request请求")})
+    public BaseResponse<String> adminUpdateUser(@RequestBody UserUpdateRequest updateRequest,
+                                                HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        if (updateRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        if (!loginUser.getRole().equals(ADMIN_ROLE)) {
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        User user = new User();
+        BeanUtils.copyProperties(updateRequest, user);
+        boolean success = userService.updateById(user);
+        if (success) {
+            return ResultUtils.success("ok");
+        } else {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
     }
 }

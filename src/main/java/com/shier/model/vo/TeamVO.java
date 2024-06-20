@@ -1,5 +1,6 @@
 package com.shier.model.vo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -51,7 +52,14 @@ public class TeamVO implements Serializable {
      * 过期时间
      */
     @ApiModelProperty(value = "过期时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", locale = "zh", timezone = "GMT+8")
     private Date expireTime;
+
+    /**
+     * 密码
+     */
+    @ApiModelProperty(value = "密码")
+    private String password;
 
     /**
      * 用户id
@@ -69,12 +77,14 @@ public class TeamVO implements Serializable {
      * 创建时间
      */
     @ApiModelProperty(value = "创建时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", locale = "zh", timezone = "GMT+8")
     private Date createTime;
 
     /**
      * 更新时间
      */
-    @ApiModelProperty(value = "创建时间")
+    @ApiModelProperty(value = "更新时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", locale = "zh", timezone = "GMT+8")
     private Date updateTime;
 
     /**

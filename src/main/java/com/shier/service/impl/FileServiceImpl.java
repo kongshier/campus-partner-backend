@@ -30,7 +30,6 @@ public class FileServiceImpl implements FileService {
      */
     @Override
     public String uploadFileAvatar(MultipartFile file) {
-
         // 工具类获取值
         String endpoint = FileAliOssUtils.END_POINT;
         String accessKeyId = FileAliOssUtils.KEY_ID;

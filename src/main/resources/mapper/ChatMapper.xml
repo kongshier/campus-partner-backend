@@ -10,6 +10,7 @@
             <result property="toid" column="toId" jdbcType="BIGINT"/>
             <result property="text" column="text" jdbcType="VARCHAR"/>
             <result property="chatType" column="chat_type" jdbcType="TINYINT"/>
+            <result property="isRead" column="is_read" jdbcType="TINYINT"/>
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
             <result property="teamId" column="team_id" jdbcType="BIGINT"/>

@@ -1,12 +1,13 @@
 package com.shier.service.impl;
 
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shier.common.ErrorCode;
+import com.shier.constants.CommonConstant;
+import com.shier.exception.BusinessException;
 import com.shier.mapper.TeamMapper;
 import com.shier.model.domain.Follow;
 import com.shier.model.domain.Team;
@@ -17,7 +18,8 @@ import com.shier.model.request.*;
 import com.shier.model.vo.TeamVO;
 import com.shier.model.vo.UserVO;
 import com.shier.service.*;
-import com.shier.exception.BusinessException;
+import com.shier.utils.SqlUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.shier.constants.SystemConstants.PAGE_SIZE;
+import static com.shier.constants.UserConstants.avatarUrls;
 
 /**
  * 团队服务impl
@@ -135,6 +138,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
         // 8. 插入队伍信息到队伍表
         team.setId(null);
         team.setUserId(userId);
+        Random random = new Random();
+        team.setCoverImage(avatarUrls[random.nextInt(avatarUrls.length)]);
         boolean result = this.save(team);
         Long teamId = team.getId();
         if (!result || teamId == null) {
@@ -154,7 +159,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
     }
 
     /**
-     * 团队名单
+     * 队伍列表
      *
      * @param currentPage 当前页面
      * @param teamQuery   团队查询
@@ -450,7 +455,6 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
         teamVO.setHasJoin(userJoin > 0);
         User leader = userService.getById(team.getUserId());
         teamVO.setLeaderName(leader.getUsername());
-
         return teamVO;
     }
 
@@ -577,7 +581,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
         }
         // 上传到阿里云
         String fileName = fileService.uploadFileAvatar(image);
-        
+
         Team temp = new Team();
         temp.setId(team.getId());
         temp.setCoverImage(fileName);
@@ -611,6 +615,51 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team> implements Te
         BeanUtils.copyProperties(teamPage, teamVOPage);
         teamVOPage.setRecords(teamVOList);
         return teamVOPage;
+    }
+
+    /**
+     * 获取查询包装类（用户根据哪些字段查询，根据前端传来的请求对象）
+     */
+    @Override
+    public QueryWrapper<Team> getQueryWrapper(TeamQueryRequest teamQueryRequest) {
+        Long id = teamQueryRequest.getId();
+        String name = teamQueryRequest.getName();
+        Integer status = teamQueryRequest.getStatus();
+        String sortField = teamQueryRequest.getSortField();
+        String sortOrder = teamQueryRequest.getSortOrder();
+
+        QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
+        if (teamQueryRequest == null) {
+            return queryWrapper;
+        }
+        // 拼接查询条件
+        queryWrapper.like(StringUtils.isNotBlank(name), "name", name);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(id), "id", id);
+        queryWrapper.eq(ObjectUtils.isNotEmpty(status), "status", status);
+        queryWrapper.eq("is_delete", false);
+        queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
+                sortField);
+        return queryWrapper;
+    }
+
+    @Override
+    public Team getSearchTeam(Team originTeam) {
+        if (originTeam == null) {
+            return null;
+        }
+        Team newTeam = new Team();
+        newTeam.setId(originTeam.getId());
+        newTeam.setName(originTeam.getName());
+        newTeam.setDescription(originTeam.getDescription());
+        newTeam.setCoverImage(originTeam.getCoverImage());
+        newTeam.setMaxNum(originTeam.getMaxNum());
+        newTeam.setExpireTime(originTeam.getExpireTime());
+        newTeam.setUserId(originTeam.getUserId());
+        newTeam.setStatus(originTeam.getStatus());
+        newTeam.setPassword(originTeam.getPassword());
+        newTeam.setCreateTime(originTeam.getCreateTime());
+        newTeam.setUpdateTime(originTeam.getUpdateTime());
+        return newTeam;
     }
 
 

@@ -1,6 +1,7 @@
 package com.shier.utils;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
  * @author Shier
  */
 @Component
+@Slf4j
 public class FileAliOssUtils implements InitializingBean {
 
     public static String END_POINT;

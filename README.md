@@ -3,7 +3,7 @@
 </p>
 
 <p align=center>
-   SUPER速配-伙伴匹配系统
+  Cat 伙伴匹配系统
 </p>
 <p align="center">
 <a target="_blank" href="https://gitee.com/ochiamaluo/super-backend">

@@ -1,11 +1,16 @@
 package com.shier.model.request;
 
+import com.shier.common.PageRequest;
+import com.shier.model.vo.UserVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
+
 
 /**
  * 团队查询请求
@@ -13,10 +18,11 @@ import java.util.List;
  * @author Shier
  * @date 2023/06/22
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @ApiModel(value = "队伍搜索请求")
-public class TeamQueryRequest implements Serializable {
-    private static final long serialVersionUID = 9111600376030432964L;
+public class TeamQueryRequest extends PageRequest implements Serializable {
+
     /**
      * id
      */
@@ -65,4 +71,31 @@ public class TeamQueryRequest implements Serializable {
     @ApiModelProperty(value = "状态0 - 公开，1 - 私有，2 - 加密")
     private Integer status;
 
+    /**
+     * 创建时间
+     */
+    @ApiModelProperty(value = "创建时间")
+    private Date createTime;
+
+    /**
+     * 更新时间
+     */
+    @ApiModelProperty(value = "更新时间")
+    private Date updateTime;
+
+    /**
+     * 创建人用户信息
+     */
+    @ApiModelProperty(value = "创建人")
+    private UserVO createUser;
+
+    private String leaderName;
+    /**
+     * 已加入的用户数
+     */
+    @ApiModelProperty(value = "已加入的用户数")
+    private Long hasJoinNum;
+
+    private static final long serialVersionUID = 9111600376030432964L;
 }
+

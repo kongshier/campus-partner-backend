@@ -66,4 +66,18 @@ public class TeamUpdateRequest implements Serializable {
     @ApiModelProperty(value = "密码")
     private String password;
 
+
+    /**
+     * 封面图片
+     */
+    @ApiModelProperty(value = "封面图片")
+    private String coverImage;
+
+
+    /**
+     * 更新时间
+     */
+    @ApiModelProperty(value = "更新时间")
+    private Date updateTime;
+
 }

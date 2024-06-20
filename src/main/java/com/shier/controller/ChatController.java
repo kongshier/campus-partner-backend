@@ -8,6 +8,7 @@ import com.shier.exception.BusinessException;
 import com.shier.model.domain.User;
 import com.shier.model.request.ChatRequest;
 import com.shier.model.vo.ChatMessageVO;
+import com.shier.model.vo.PrivateChatVO;
 import com.shier.service.ChatService;
 import com.shier.service.UserService;
 import io.swagger.annotations.Api;
@@ -29,7 +30,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/chat")
 @Api(tags = "聊天管理模块")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://pt.kongshier.top"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://47.121.118.209:7101","http://localhost:5174"}, allowCredentials = "true")
 public class ChatController {
     /**
      * 聊天服务
@@ -108,5 +109,47 @@ public class ChatController {
         }
         List<ChatMessageVO> hallChat = chatService.getHallChat(ChatConstant.HALL_CHAT, loginUser);
         return ResultUtils.success(hallChat);
+    }
+
+    @GetMapping("/private")
+    @ApiOperation(value = "获取私聊列表")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(name = "request", value = "request请求")})
+    public BaseResponse<List<PrivateChatVO>> getPrivateChatList(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        List<PrivateChatVO> userList = chatService.getPrivateList(loginUser.getId());
+        return ResultUtils.success(userList);
+    }
+
+    /**
+     * 获取私聊未读消息数量
+     *
+     * @param request 要求
+     * @return {@link BaseResponse}<{@link Integer}>
+     */
+    @GetMapping("/private/num")
+    @ApiOperation(value = "获取私聊未读消息数量")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(name = "request", value = "request请求")})
+    public BaseResponse<Integer> getUnreadPrivateNum(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        Integer unreadNum = chatService.getUnReadPrivateNum(loginUser.getId());
+        return ResultUtils.success(unreadNum);
+    }
+
+    @PutMapping("/private/read")
+    public BaseResponse<Boolean> readPrivateMessage(HttpServletRequest request, Long remoteId) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        Boolean flag = chatService.readPrivateMessage(loginUser.getId(), remoteId);
+        return ResultUtils.success(flag);
     }
 }
