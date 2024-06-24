@@ -55,7 +55,8 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
         if (list == null || list.size() == 0) {
             return new ArrayList<>();
         }
-        List<User> userList = list.stream().map((follow -> userService.getById(follow.getUserId()))).filter(Objects::nonNull).collect(Collectors.toList());
+        List<User> userList = list.stream().map((follow -> userService.getById(follow.getUserId())))
+                .filter(Objects::nonNull).collect(Collectors.toList());
         return userList.stream().map((item) -> {
             UserVO userVO = new UserVO();
             BeanUtils.copyProperties(item, userVO);

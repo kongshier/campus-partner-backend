@@ -1,7 +1,7 @@
 package com.shier.mapper;
 
-import com.shier.model.domain.Config;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.shier.model.domain.Config;
 
 /**
 * @author Shier

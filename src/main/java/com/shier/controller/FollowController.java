@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
- * 关注控制器
+ * 关注接口
  *
  * @author Shier
  * @date 2023/06/11
@@ -28,7 +28,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/follow")
 @Api(tags = "关注管理模块")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://47.121.118.209:7101","http://localhost:5174"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://47.121.118.209","http://localhost:5174"}, allowCredentials = "true")
 public class FollowController {
     /**
      * 关注服务

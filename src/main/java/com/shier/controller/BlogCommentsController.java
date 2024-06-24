@@ -30,7 +30,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/comments")
 @Api(tags = "博文评论管理模块")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://47.121.118.209:7101","http://localhost:5174"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://47.121.118.209","http://localhost:5174"}, allowCredentials = "true")
 public class BlogCommentsController {
     /**
      * 博客评论服务

@@ -30,9 +30,10 @@ public interface ChatService extends IService<Chat> {
 
     List<ChatMessageVO> getHallChat(int chatType, User loginUser);
 
+    // 获得到私聊用户列表
     List<PrivateChatVO> getPrivateList(Long id);
 
     Integer getUnReadPrivateNum(Long userId);
-
+    // 私聊已读
     Boolean readPrivateMessage(Long loginId, Long remoteId);
 }

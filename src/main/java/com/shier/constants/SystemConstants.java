@@ -22,7 +22,6 @@ public interface SystemConstants {
      */
     int DEFAULT_CACHE_PAGE = 5;
 
-
     /**
      * 最长登录空闲时间
      */

@@ -14,6 +14,7 @@ public interface UserConstants {
      */
     public static final int ADMIN_ROLE = 1;
 
+
     /**
      * 最小帐户长度
      */
@@ -28,7 +29,6 @@ public interface UserConstants {
      * 默认权限
      */
     public static final int DEFAULT_ROLE = 0;
-
 
     public static final String[] avatarUrls = {
             "https://shierprojectes.oss-cn-guangzhou.aliyuncs.com/images/catImage/1.jpg",

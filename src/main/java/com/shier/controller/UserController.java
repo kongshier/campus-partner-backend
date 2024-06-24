@@ -275,7 +275,6 @@ public class UserController {
         } else {
             String key = RedisConstants.USER_FORGET_PASSWORD_KEY + phone;
             Integer code = ValidateCodeUtils.generateValidateCode(4);
-//            SMSUtils.sendMessage(phone, String.valueOf(code));
             System.out.println(code);
             stringRedisTemplate.opsForValue().set(key, String.valueOf(code), RedisConstants.USER_FORGET_PASSWORD_TTL, TimeUnit.MINUTES);
             return ResultUtils.success(user.getUserAccount());
@@ -318,7 +317,6 @@ public class UserController {
             {@ApiImplicitParam(name = "updatePasswordRequest", value = "修改密码请求")})
     public BaseResponse<String> updatePassword(@RequestBody UpdatePasswordRequest updatePasswordRequest) {
         String phone = updatePasswordRequest.getPhone();
-        // String code = updatePasswordRequest.getCode();
         String password = updatePasswordRequest.getPassword();
         String confirmPassword = updatePasswordRequest.getConfirmPassword();
         if (StringUtils.isAnyBlank(phone, password, confirmPassword)) {
@@ -362,19 +360,16 @@ public class UserController {
     @ApiImplicitParams(
             {@ApiImplicitParam(name = "id", value = "用户id"),
                     @ApiImplicitParam(name = "request", value = "request请求")})
-    public BaseResponse<Boolean> deleteUser(Long id, HttpServletRequest request) {
+    public BaseResponse<Boolean> deleteUser(@RequestBody long id, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
-        }
-        if (loginUser.getId().equals(id)) {
-            throw new BusinessException(ErrorCode.FORBIDDEN, "无法删除自己");
         }
         if (!userService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH);
         }
         if (id <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "id不存在");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         boolean b = userService.removeById(id);
         return ResultUtils.success(b);
@@ -415,7 +410,7 @@ public class UserController {
     @ApiImplicitParams(
             {@ApiImplicitParam(name = "username", value = "用户名"),
                     @ApiImplicitParam(name = "request", value = "request请求")})
-    public BaseResponse<Page<User>> searchUsersByUserName(String username, Long currentPage, HttpServletRequest request) {
+    public BaseResponse<Page<User>> searchUsersByUserName(String username,Long currentPage, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
@@ -651,7 +646,6 @@ public class UserController {
         return ResultUtils.success(id);
     }
 
-
     /**
      * 获取我的历史签到
      *
@@ -667,7 +661,7 @@ public class UserController {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
         Long loginUserId = loginUser.getId();
-        List<Sign> signList = signService.list(new QueryWrapper<Sign>().eq("user_id", loginUserId));
+        List<Sign> signList = signService.list(new QueryWrapper<Sign>().eq("user_id", loginUserId).orderByDesc("create_time"));
         log.info("我的签到次数：{}", signList.size());
         return ResultUtils.success(signList);
     }

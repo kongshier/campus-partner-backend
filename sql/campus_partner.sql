@@ -1,18 +1,3 @@
-/*
- Navicat Premium Data Transfer
-
- Source Server         : MySQL
- Source Server Type    : MySQL
- Source Server Version : 50635
- Source Host           : localhost:3306
- Source Schema         : super
-
- Target Server Type    : MySQL
- Target Server Version : 50635
- File Encoding         : 65001
-
- Date: 23/06/2023 13:42:14
-*/
 CREATE DATABASE IF NOT EXISTS campus_partner;
 
 SET NAMES utf8mb4;
@@ -34,11 +19,8 @@ CREATE TABLE `blog`
     `create_time`  timestamp                                                      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`  timestamp                                                      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 19
-  CHARACTER SET = utf8mb4
-  COLLATE = utf8mb4_general_ci
-  ROW_FORMAT = COMPACT;
+) comment '博客表' charset = utf8
+                   row_format = COMPACT;;
 
 -- ----------------------------
 -- 博客评论表
@@ -57,11 +39,8 @@ CREATE TABLE `blog_comments`
     `create_time` timestamp                                                     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` timestamp                                                     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 6
-  CHARACTER SET = utf8mb4
-  COLLATE = utf8mb4_general_ci
-  ROW_FORMAT = COMPACT;
+) comment '博客评论信息表' charset = utf8
+                           row_format = COMPACT;;
 
 -- ----------------------------
 -- 博客点赞表
@@ -76,11 +55,8 @@ CREATE TABLE `blog_like`
     `update_time` datetime   NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `is_delete`   tinyint(4) NULL DEFAULT 0 COMMENT '逻辑删除',
     PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 4
-  CHARACTER SET = utf8
-  COLLATE = utf8_general_ci
-  ROW_FORMAT = COMPACT;
+) comment '博客点赞表' charset = utf8
+                       row_format = COMPACT;;
 
 -- ----------------------------
 -- 聊天信息表
@@ -93,13 +69,14 @@ CREATE TABLE `chat`
     `to_id`       bigint(20)                                                    NULL DEFAULT NULL COMMENT '接收消息id',
     `text`        varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
     `chat_type`   tinyint(4)                                                    NOT NULL COMMENT '聊天类型 1-私聊 2-群聊',
-    `is_read`     tinyint                                                       default 0 null comment '是否已读 1-已读 2-未读',
+    `is_read`     tinyint                                                            default 0 null comment '是否已读 1-已读 2-未读',
     `create_time` datetime                                                      NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time` datetime                                                      NULL DEFAULT CURRENT_TIMESTAMP,
     `team_id`     bigint(20)                                                    NULL DEFAULT NULL,
     `is_delete`   tinyint(4)                                                    NULL DEFAULT 0
 )
-    COLLATE = utf8mb4_general_ci COMMENT = '聊天消息表';
+    COMMENT = '聊天消息表' charset = utf8
+                           row_format = COMPACT;;
 
 -- ----------------------------
 -- 评论点赞表
@@ -114,11 +91,8 @@ CREATE TABLE `comment_like`
     `update_time` datetime   NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `is_delete`   tinyint(4) NULL DEFAULT 0 COMMENT '逻辑删除',
     PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 10
-  CHARACTER SET = utf8mb4
-  COLLATE = utf8mb4_general_ci
-  ROW_FORMAT = COMPACT;
+) comment '评论点赞表' charset = utf8
+                       row_format = COMPACT;;
 
 -- ----------------------------
 -- 用户关注表
@@ -133,11 +107,8 @@ CREATE TABLE `follow`
     `update_time`    timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `is_delete`      tinyint(4)          NULL     DEFAULT 0 COMMENT '逻辑删除',
     PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 44
-  CHARACTER SET = utf8
-  COLLATE = utf8_general_ci
-  ROW_FORMAT = COMPACT;
+) comment '用户关注' charset = utf8
+                     row_format = COMPACT;
 
 -- ----------------------------
 -- 好友申请表
@@ -155,11 +126,9 @@ CREATE TABLE `friends`
     `is_delete`   tinyint(4)                                                    NOT NULL DEFAULT 0 COMMENT '是否删除',
     `remark`      varchar(214) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL     DEFAULT NULL COMMENT '好友申请备注信息',
     PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 2
-  CHARACTER SET = utf8mb4
-  COLLATE = utf8mb4_general_ci COMMENT = '好友申请管理表'
-  ROW_FORMAT = Compact;
+) COMMENT = '好友申请管理表'
+    ROW_FORMAT = compact;
+
 
 -- ----------------------------
 -- 消息表
@@ -177,11 +146,8 @@ CREATE TABLE `message`
     `update_time` datetime                                                      NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `is_delete`   tinyint(4)                                                    NULL DEFAULT 0 COMMENT '逻辑删除',
     PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 1
-  CHARACTER SET = utf8mb4
-  COLLATE = utf8mb4_general_ci
-  ROW_FORMAT = Compact;
+) comment '消息表' charset = utf8
+                   row_format = COMPACT;
 
 -- ----------------------------
 -- 签到表
@@ -195,7 +161,8 @@ CREATE TABLE `sign`
     `update_time` datetime   NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `create_time` datetime   NULL     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `is_backup`   tinyint(1) NOT NULL default 0 COMMENT '是否补签 0-不补签 1-补签'
-) comment '签到表' collate = utf8mb4_unicode_ci;
+) comment '签到表' char set = utf8
+                   row_format = compact;
 
 
 -- ----------------------------
@@ -215,11 +182,8 @@ CREATE TABLE `tag`
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE INDEX `uniIdx_tagName` (`tag_name`) USING BTREE,
     INDEX `Idx_userId` (`user_id`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 1
-  CHARACTER SET = utf8
-  COLLATE = utf8_general_ci
-  ROW_FORMAT = DYNAMIC;
+) comment '标签表' charset = utf8
+                   row_format = COMPACT;
 
 -- ----------------------------
 -- 队伍表
@@ -240,11 +204,8 @@ CREATE TABLE `team`
     `update_time` datetime                                                       NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `is_delete`   tinyint(4)                                                     NOT NULL DEFAULT 0 COMMENT '是否删除',
     PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 11
-  CHARACTER SET = utf8mb4
-  COLLATE = utf8mb4_general_ci COMMENT = '队伍'
-  ROW_FORMAT = COMPACT;
+) COMMENT = '队伍表'
+    ROW_FORMAT = COMPACT;
 
 -- ----------------------------
 -- 用户表
@@ -272,7 +233,7 @@ CREATE TABLE `user`
     UNIQUE INDEX `uniIdx_account` (`user_account`) USING BTREE
 ) comment '用户表' row_format = COMPACT;
 
-
+-- 配置表
 create table if not exists config
 (
     id          bigint auto_increment comment '主键'
@@ -282,9 +243,8 @@ create table if not exists config
     create_time timestamp default CURRENT_TIMESTAMP not null comment '创建时间',
     update_time timestamp default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     is_delete   tinyint   default 0                 null comment '逻辑删除'
-)
-    charset = utf8
-    row_format = COMPACT;
+) comment '系统配置表' charset = utf8
+                       row_format = COMPACT;
 
 -- ----------------------------
 -- 用户队伍表
@@ -300,10 +260,7 @@ CREATE TABLE `user_team`
     `update_time` datetime   NULL     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `is_delete`   tinyint(4) NOT NULL DEFAULT 0 COMMENT '是否删除',
     PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 16
-  CHARACTER SET = utf8
-  COLLATE = utf8_general_ci COMMENT = '用户队伍关系'
-  ROW_FORMAT = COMPACT;
+) COMMENT = '用户队伍关系'
+    ROW_FORMAT = COMPACT;
 
 SET FOREIGN_KEY_CHECKS = 1;

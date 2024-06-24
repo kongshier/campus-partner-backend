@@ -55,6 +55,8 @@ public interface UserService extends IService<User> {
 
     Page<UserVO> preMatchUser(long currentPage, String username, User loginUser);
 
+
+
     /**
      * 之后插入用户
      *
@@ -79,7 +81,7 @@ public interface UserService extends IService<User> {
     String adminLogin(String userAccount, String userPassword, HttpServletRequest request);
 
     /**
-     * 改变用户地位
+     * 改变用户角色
      *
      * @param id id
      */

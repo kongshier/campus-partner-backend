@@ -52,9 +52,6 @@ public class UserUpdateRequest implements Serializable {
     @ApiModelProperty(value = "手机号")
     private String phone;
 
-    @ApiModelProperty(value = "角色")
-    private Integer role;
-
     /**
      * 邮箱
      */
@@ -69,4 +66,7 @@ public class UserUpdateRequest implements Serializable {
 
     @ApiModelProperty(value = "验证码")
     private String code;
+
+    @ApiModelProperty(value = "角色")
+    private Integer role;
 }

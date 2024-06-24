@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/friends")
 @Api(tags = "好友管理模块")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://47.121.118.209:7101","http://localhost:5174"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://47.121.118.209", "http://localhost:5174"}, allowCredentials = "true")
 public class FriendsController {
     /**
      * 好友服务
@@ -120,13 +120,12 @@ public class FriendsController {
     }
 
     /**
-     * 按状态搜索好友列表
+     * 获取好友列表
      *
      * @param request 请求
-     * @return {@link BaseResponse}<{@link List}<{@link User}>>
      */
     @GetMapping("/my/list")
-    @ApiOperation(value = "通过用户名搜索用户")
+    @ApiOperation(value = "我的好友")
     @ApiImplicitParams(
             {@ApiImplicitParam(name = "request", value = "request请求")})
     public BaseResponse<List<User>> searchUsersByUserName(HttpServletRequest request) {
@@ -140,7 +139,6 @@ public class FriendsController {
                 .eq("status", 1));
         // 使用流和Lambda表达式进行过滤查询
         List<User> userList = friendsList.stream().map(friends -> userService.getById(friends.getFromId())).collect(Collectors.toList());
-
         return ResultUtils.success(userList);
     }
 
@@ -158,6 +156,10 @@ public class FriendsController {
                     @ApiImplicitParam(name = "request", value = "request请求")})
     public BaseResponse<Boolean> agreeToApply(@PathVariable("fromId") Long fromId, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        // 接收者
         boolean agreeToApplyStatus = friendsService.agreeToApply(loginUser, fromId);
         return ResultUtils.success(agreeToApplyStatus);
     }
@@ -202,5 +204,24 @@ public class FriendsController {
         User loginUser = userService.getLoginUser(request);
         boolean isRead = friendsService.toRead(loginUser, ids);
         return ResultUtils.success(isRead);
+    }
+
+    /**
+     * 获取未阅读过的申请列表
+     *
+     * @param request 请求
+     * @return {@link BaseResponse}
+     */
+    @GetMapping("/noRead/Num")
+    @ApiOperation(value = "阅读")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(name = "request", value = "request请求")})
+    public BaseResponse<Long> applyNoReadNum(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        long messageNum = friendsService.applyNoRead(loginUser.getId());
+        return ResultUtils.success(messageNum);
     }
 }

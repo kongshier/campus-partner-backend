@@ -83,7 +83,6 @@ public class BlogComments implements Serializable {
      * 更新时间
      */
     @ApiModelProperty(value = "更新时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",locale = "zh", timezone = "GMT+8")
     private Date updateTime;
 
     @TableField(exist = false)

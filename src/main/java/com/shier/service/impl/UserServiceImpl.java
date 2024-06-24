@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.shier.common.ErrorCode;
+import com.shier.constants.UserConstants;
 import com.shier.exception.BusinessException;
 import com.shier.mapper.UserMapper;
 import com.shier.model.domain.Follow;
@@ -52,7 +53,6 @@ import static com.shier.constants.UserConstants.*;
 @Service
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
-
 
     @Resource
     private UserMapper userMapper;
@@ -257,7 +257,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public boolean isAdmin(User loginUser) {
-        return loginUser != null && loginUser.getRole() == ADMIN_ROLE;
+        return loginUser != null && loginUser.getRole() == UserConstants.ADMIN_ROLE;
     }
 
     @Override
@@ -594,7 +594,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return true;
         }).map(this::getSafetyUser).collect(Collectors.toList());
     }
-
 
     /**
      * 管理员注册

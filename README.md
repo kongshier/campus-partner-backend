@@ -47,6 +47,7 @@ Github：https://github.com/kongshier/campus-partner-admin
 
 http://47.121.118.209:7101
 
+
 账号可以自行注册，一切聊天、评论需遵守中华人民共和国有关法律规定。
 
 仅支持有效手机号注册，请使用以下账号直接登录：

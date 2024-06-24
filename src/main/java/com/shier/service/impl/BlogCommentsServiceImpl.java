@@ -3,6 +3,7 @@ package com.shier.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.shier.common.ErrorCode;
+import com.shier.exception.BusinessException;
 import com.shier.mapper.BlogCommentsMapper;
 import com.shier.model.domain.*;
 import com.shier.model.enums.MessageTypeEnum;
@@ -11,7 +12,6 @@ import com.shier.model.vo.BlogCommentsVO;
 import com.shier.model.vo.BlogVO;
 import com.shier.model.vo.UserVO;
 import com.shier.service.*;
-import com.shier.exception.BusinessException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -131,6 +131,7 @@ public class BlogCommentsServiceImpl extends ServiceImpl<BlogCommentsMapper, Blo
         }
     }
 
+    // 删除评论
     @Override
     @Transactional
     public void deleteComment(Long id, Long userId, boolean isAdmin) {
@@ -164,7 +165,6 @@ public class BlogCommentsServiceImpl extends ServiceImpl<BlogCommentsMapper, Blo
             UserVO userVO = new UserVO();
             BeanUtils.copyProperties(user, userVO);
             blogCommentsVO.setCommentUser(userVO);
-
             Long blogId = blogCommentsVO.getBlogId();
             Blog blog = blogService.getById(blogId);
             BlogVO blogVO = new BlogVO();
@@ -174,7 +174,7 @@ public class BlogCommentsServiceImpl extends ServiceImpl<BlogCommentsMapper, Blo
                 blogVO.setCoverImage(null);
             } else {
                 String[] imgStr = images.split(",");
-                blogVO.setCoverImage( imgStr[0]);
+                blogVO.setCoverImage(imgStr[0]);
             }
             Long authorId = blogVO.getUserId();
             User author = userService.getById(authorId);

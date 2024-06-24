@@ -182,6 +182,46 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
         return chatMessageVOS;
     }
 
+    private List<ChatMessageVO> checkIsMyMessage(User loginUser, List<ChatMessageVO> chatRecords) {
+        return chatRecords.stream().peek(chat -> {
+            if (chat.getFormUser().getId() != loginUser.getId() && chat.getIsMy()) {
+                chat.setIsMy(false);
+            }
+            if (chat.getFormUser().getId() == loginUser.getId() && !chat.getIsMy()) {
+                chat.setIsMy(true);
+            }
+        }).collect(Collectors.toList());
+    }
+
+    private List<ChatMessageVO> returnMessage(User loginUser, Long userId, LambdaQueryWrapper<Chat> chatLambdaQueryWrapper) {
+        List<Chat> chatList = this.list(chatLambdaQueryWrapper);
+        return chatList.stream().map(chat -> {
+            ChatMessageVO ChatMessageVO = chatResult(chat.getFromId(), chat.getText());
+            boolean isCaptain = userId != null && userId.equals(chat.getFromId());
+            if (userService.getById(chat.getFromId()).getRole() == ADMIN_ROLE || isCaptain) {
+                ChatMessageVO.setIsAdmin(true);
+            }
+            if (chat.getFromId().equals(loginUser.getId())) {
+                ChatMessageVO.setIsMy(true);
+            }
+            ChatMessageVO.setCreateTime(DateUtil.format(chat.getCreateTime(), "yyyy年MM月dd日 HH:mm:ss"));
+            return ChatMessageVO;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 获取私聊未读消息数量
+     *
+     * @param userId id
+     * @return {@link Integer}
+     */
+    @Override
+    public Integer getUnReadPrivateNum(Long userId) {
+        LambdaQueryWrapper<Chat> chatLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        chatLambdaQueryWrapper.eq(Chat::getToId, userId).eq(Chat::getChatType, PRIVATE_CHAT)
+                .eq(Chat::getIsRead, 0);
+        return Math.toIntExact(this.count(chatLambdaQueryWrapper));
+    }
 
     /**
      * 获取私聊列表
@@ -191,6 +231,7 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
      */
     @Override
     public List<PrivateChatVO> getPrivateList(Long userId) {
+        // 查询我发送的消息
         LambdaQueryWrapper<Chat> chatLambdaQueryWrapper = new LambdaQueryWrapper<>();
         chatLambdaQueryWrapper.eq(Chat::getFromId, userId).eq(Chat::getChatType, PRIVATE_CHAT);
         List<Chat> mySend = this.list(chatLambdaQueryWrapper);
@@ -200,6 +241,7 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
             userIdSet.add(toId);
         });
         chatLambdaQueryWrapper.clear();
+        // 查询我接受到的消息条数
         chatLambdaQueryWrapper.eq(Chat::getToId, userId).eq(Chat::getChatType, PRIVATE_CHAT);
         List<Chat> myReceive = this.list(chatLambdaQueryWrapper);
         myReceive.forEach((chat) -> {
@@ -220,36 +262,6 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
         }).sorted().collect(Collectors.toList());
     }
 
-    /**
-     * 获取私聊未读消息数量
-     *
-     * @param userId id
-     * @return {@link Integer}
-     */
-    @Override
-    public Integer getUnReadPrivateNum(Long userId) {
-        LambdaQueryWrapper<Chat> chatLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        chatLambdaQueryWrapper.eq(Chat::getToId, userId).eq(Chat::getChatType, PRIVATE_CHAT)
-                .eq(Chat::getIsRead, 0);
-        return Math.toIntExact(this.count(chatLambdaQueryWrapper));
-    }
-
-    /**
-     * 阅读私聊消息
-     *
-     * @param loginId  登录id
-     * @param remoteId 遥远id
-     * @return {@link Boolean}
-     */
-    @Override
-    public Boolean readPrivateMessage(Long loginId, Long remoteId) {
-        LambdaUpdateWrapper<Chat> chatLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-        chatLambdaUpdateWrapper.eq(Chat::getFromId, remoteId)
-                .eq(Chat::getToId, loginId)
-                .eq(Chat::getChatType, PRIVATE_CHAT)
-                .set(Chat::getIsRead, 1);
-        return this.update(chatLambdaUpdateWrapper);
-    }
 
     /**
      * 获取未读消息数量
@@ -304,34 +316,22 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
         }
     }
 
-
-    private List<ChatMessageVO> checkIsMyMessage(User loginUser, List<ChatMessageVO> chatRecords) {
-        return chatRecords.stream().peek(chat -> {
-            if (chat.getFormUser().getId() != loginUser.getId() && chat.getIsMy()) {
-                chat.setIsMy(false);
-            }
-            if (chat.getFormUser().getId() == loginUser.getId() && !chat.getIsMy()) {
-                chat.setIsMy(true);
-            }
-        }).collect(Collectors.toList());
+    /**
+     * 阅读私聊消息
+     *
+     * @param loginId  登录id
+     * @param remoteId 遥远id
+     * @return {@link Boolean}
+     */
+    @Override
+    public Boolean readPrivateMessage(Long loginId, Long remoteId) {
+        LambdaUpdateWrapper<Chat> chatLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        chatLambdaUpdateWrapper.eq(Chat::getFromId, remoteId)
+                .eq(Chat::getToId, loginId)
+                .eq(Chat::getChatType, PRIVATE_CHAT)
+                .set(Chat::getIsRead, 1);
+        return this.update(chatLambdaUpdateWrapper);
     }
-
-    private List<ChatMessageVO> returnMessage(User loginUser, Long userId, LambdaQueryWrapper<Chat> chatLambdaQueryWrapper) {
-        List<Chat> chatList = this.list(chatLambdaQueryWrapper);
-        return chatList.stream().map(chat -> {
-            ChatMessageVO ChatMessageVO = chatResult(chat.getFromId(), chat.getText());
-            boolean isCaptain = userId != null && userId.equals(chat.getFromId());
-            if (userService.getById(chat.getFromId()).getRole() == ADMIN_ROLE || isCaptain) {
-                ChatMessageVO.setIsAdmin(true);
-            }
-            if (chat.getFromId().equals(loginUser.getId())) {
-                ChatMessageVO.setIsMy(true);
-            }
-            ChatMessageVO.setCreateTime(DateUtil.format(chat.getCreateTime(), "yyyy年MM月dd日 HH:mm:ss"));
-            return ChatMessageVO;
-        }).collect(Collectors.toList());
-    }
-
 }
 
 

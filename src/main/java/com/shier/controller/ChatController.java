@@ -30,7 +30,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/chat")
 @Api(tags = "聊天管理模块")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://47.121.118.209:7101","http://localhost:5174"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://47.121.118.209","http://localhost:5174"}, allowCredentials = "true")
 public class ChatController {
     /**
      * 聊天服务
@@ -111,7 +111,13 @@ public class ChatController {
         return ResultUtils.success(hallChat);
     }
 
-    @GetMapping("/private")
+
+    /**
+     * 私聊
+     * @param request
+     * @return
+     */
+    @GetMapping("/private/list")
     @ApiOperation(value = "获取私聊列表")
     @ApiImplicitParams(
             {@ApiImplicitParam(name = "request", value = "request请求")})
@@ -125,7 +131,7 @@ public class ChatController {
     }
 
     /**
-     * 获取私聊未读消息数量
+     * 获取私聊未读消息数量（接受消息）
      *
      * @param request 要求
      * @return {@link BaseResponse}<{@link Integer}>
@@ -143,6 +149,12 @@ public class ChatController {
         return ResultUtils.success(unreadNum);
     }
 
+    /**
+     * 私聊已读
+     * @param request
+     * @param remoteId
+     * @return
+     */
     @PutMapping("/private/read")
     public BaseResponse<Boolean> readPrivateMessage(HttpServletRequest request, Long remoteId) {
         User loginUser = userService.getLoginUser(request);

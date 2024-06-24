@@ -58,4 +58,9 @@ public interface RedisConstants {
      * 用户推荐缓存
      */
     String USER_RECOMMEND_KEY = "campus:recommend:";
+
+    /**
+     * 新点赞消息键
+     */
+    String MESSAGE_FRIENDS_NUM_KEY = "campus:message:friends:num:";
 }

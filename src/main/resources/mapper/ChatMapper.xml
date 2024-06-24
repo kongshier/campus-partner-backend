@@ -5,20 +5,21 @@
 <mapper namespace="com.shier.mapper.ChatMapper">
 
     <resultMap id="BaseResultMap" type="com.shier.model.domain.Chat">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="fromId" column="from_id" jdbcType="BIGINT"/>
-            <result property="toid" column="toId" jdbcType="BIGINT"/>
-            <result property="text" column="text" jdbcType="VARCHAR"/>
-            <result property="chatType" column="chat_type" jdbcType="TINYINT"/>
-            <result property="isRead" column="is_read" jdbcType="TINYINT"/>
-            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
-            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
-            <result property="teamId" column="team_id" jdbcType="BIGINT"/>
-            <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="fromId" column="from_id" jdbcType="BIGINT"/>
+        <result property="toId" column="toId" jdbcType="BIGINT"/>
+        <result property="text" column="text" jdbcType="VARCHAR"/>
+        <result property="isRead" column="is_read" jdbcType="TINYINT"/>
+        <result property="chatType" column="chat_type" jdbcType="TINYINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="teamId" column="team_id" jdbcType="BIGINT"/>
+        <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,from_id,toId,
+        id
+        ,from_id,toId,
         text,chat_type,create_time,
         update_time,team_id,is_delete
     </sql>

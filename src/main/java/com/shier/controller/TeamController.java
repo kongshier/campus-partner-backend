@@ -9,7 +9,6 @@ import com.shier.common.BaseResponse;
 import com.shier.common.ErrorCode;
 import com.shier.common.ResultUtils;
 import com.shier.constants.UserConstants;
-import com.shier.exception.BusinessException;
 import com.shier.manager.RedisLimiterManager;
 import com.shier.model.domain.Team;
 import com.shier.model.domain.User;
@@ -24,6 +23,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import com.shier.exception.BusinessException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -48,7 +48,7 @@ import static com.shier.constants.UserConstants.ADMIN_ROLE;
 @RestController
 @RequestMapping("/team")
 @Api(tags = "队伍管理模块")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://47.121.118.209", "http://localhost:5174"}, allowCredentials = "true")
+@CrossOrigin(originPatterns = {"http://localhost:5173", "http://47.121.118.209","http://localhost:5174"}, allowCredentials = "true")
 public class TeamController {
     /**
      * 团队服务
@@ -136,6 +136,7 @@ public class TeamController {
         return ResultUtils.success(true);
     }
 
+
     /**
      * 通过id获取团队
      *
@@ -150,6 +151,10 @@ public class TeamController {
         if (id == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+//        boolean contains = bloomFilter.contains(String.valueOf(id));
+//        if (!contains) {
+//            return ResultUtils.success(null);
+//        }
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
@@ -158,7 +163,7 @@ public class TeamController {
     }
 
     /**
-     * 队伍列表
+     * 团队名单
      *
      * @param currentPage      当前页面
      * @param teamQueryRequest 团队查询请求

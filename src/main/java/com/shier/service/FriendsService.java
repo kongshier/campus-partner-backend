@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Set;
 
 /**
-* @author Shier
-* @description 针对表【friends(好友申请管理表)】的数据库操作Service
-* @createDate 2023-06-18 14:10:45
-*/
+ * @author Shier
+ * @description 针对表【friends(好友申请管理表)】的数据库操作Service
+ * @createDate 2023-06-18 14:10:45
+ */
 public interface FriendsService extends IService<Friends> {
 
     /**
@@ -75,4 +75,11 @@ public interface FriendsService extends IService<Friends> {
      * @return
      */
     boolean toRead(User loginUser, Set<Long> ids);
+
+    /**
+     * 未申请阅读列表
+     */
+    Long applyNoRead(Long userId);
+
+
 }

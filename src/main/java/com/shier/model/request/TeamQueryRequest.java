@@ -5,12 +5,10 @@ import com.shier.model.vo.UserVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-
 
 /**
  * 团队查询请求
@@ -18,11 +16,10 @@ import java.util.List;
  * @author Shier
  * @date 2023/06/22
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
 @ApiModel(value = "队伍搜索请求")
 public class TeamQueryRequest extends PageRequest implements Serializable {
-
+    private static final long serialVersionUID = 9111600376030432964L;
     /**
      * id
      */
@@ -96,6 +93,4 @@ public class TeamQueryRequest extends PageRequest implements Serializable {
     @ApiModelProperty(value = "已加入的用户数")
     private Long hasJoinNum;
 
-    private static final long serialVersionUID = 9111600376030432964L;
 }
-

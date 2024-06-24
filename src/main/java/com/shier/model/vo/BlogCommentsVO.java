@@ -1,10 +1,10 @@
 package com.shier.model.vo;
 
+import com.shier.model.domain.BlogComments;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import com.shier.model.domain.BlogComments;
 
 import java.io.Serializable;
 
